@@ -65,8 +65,6 @@ class LoginForm extends SilverStripeLoginForm
     /**
      * Handle a submission for a given provider - build redirection
      *
-     * @todo Re-do config
-     * @todo Collaborators support?
      * @param string $name
      * @return SS_HTTPResponse
      */
