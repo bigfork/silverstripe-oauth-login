@@ -1,0 +1,3 @@
+Bigfork\SilverStripeOAuth\Client\Control\Controller:
+  extensions:
+    - Bigfork\SilverStripeOAuth\Client\Extension\ControllerExtension

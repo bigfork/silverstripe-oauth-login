@@ -1,0 +1,11 @@
+{
+	"name": "bigfork/silverstripe-oauthlogin",
+	"description": "All the socials.",
+	"require": {
+		"bigfork/silverstripe-oauth": "*",
+        "silverstripe/framework": "^3.3"
+	},
+	"autoload": {
+		"psr-4": {"Bigfork\\SilverStripeOAuth\\Client\\": "src/"}
+	}
+}
