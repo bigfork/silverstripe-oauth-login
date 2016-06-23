@@ -35,6 +35,7 @@ class ControllerExtension extends \Extension
 
         try {
             $member = $this->memberFromResourceOwner($user, $providerName);
+            $this->owner->setMember($member);
         } catch (TokenlessUserExistsException $e) {
             return Security::permissionFailure($this->owner, $e->getMessage());
         }

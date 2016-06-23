@@ -85,4 +85,3 @@ Bigfork\SilverStripeOAuth\Client\Factory\MemberMapperFactory:
 - Signing up via standard email + password, then attempting to log in using oauth with an account matching that email will currently fail. Probably needs to be handled better
 - See if templates/extension points can be used to make the login buttons more easily customisable
 - What should happen if I sign in with Facebook, then Google using the same email address? Should one profile's data overwrite the other? Priority based? Separate accounts?
-- Should the callback share the same endpoint as standard auth requests and hook into it somehow, rather than use a separate endpoint?
