@@ -19,5 +19,8 @@
 	},
 	"autoload": {
 		"psr-4": {"Bigfork\\SilverStripeOAuth\\Client\\": "src/"}
+	},
+	"extra": {
+		"installer-name": "oauth-login"
 	}
 }
