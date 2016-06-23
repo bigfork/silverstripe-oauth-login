@@ -1,6 +1,6 @@
 # SilverStripe OAuth Login
 
-SilverStripe OAuth2-based login functionality, based on the PHP League's [OAuth2 client](http://oauth2-client.thephpleague.com/) and the [SilverStripe OAuth2 module](https://github.com/bigfork/silverstripe-oauth2).
+SilverStripe OAuth2-based login functionality, based on the PHP League's [OAuth2 client](http://oauth2-client.thephpleague.com/) and the [SilverStripe OAuth module](https://github.com/bigfork/SilverStripe-OAuth).
 
 ## \*\* IMPORTANT \*\*
 
@@ -15,11 +15,11 @@ This module must be installed with composer. Run `composer require bigfork/silve
 
 ## Configuration
 
-**NOTE:** You must first configure your OAuth providers using the configuration options detailed in the [SilverStripe OAuth2 module documentation](https://github.com/bigfork/silverstripe-oauth2#configuration).
+**NOTE:** You must first configure your OAuth providers using the configuration options detailed in the [SilverStripe OAuth2 module documentation](https://github.com/bigfork/SilverStripe-OAuth#configuration).
 
 To show a login button for a configured provider, you must add them to the new `Authenticator` class’ YAML configuration. The configuration has two options avaiable: `name` (shown on the “Login as X” button, how this is configured may change in future releases) and `scopes` (the desired scopes/permission levels for the access token).
 
-Following on from the Facebook example in the [SilverStripe OAuth2 module documentation](https://github.com/bigfork/silverstripe-oauth2#configuration):
+Following on from the Facebook example in the [SilverStripe OAuth2 module documentation](https://github.com/bigfork/SilverStripe-OAuth#configuration):
 
 ```yml
 Bigfork\SilverStripeOAuth\Client\Factory\ProviderFactory:
