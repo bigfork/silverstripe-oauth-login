@@ -7,7 +7,9 @@ use Bigfork\SilverStripeOAuth\Client\Factory\ProviderFactory;
 use Controller;
 use Director;
 use Injector;
+use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
+use League\OAuth2\Client\Token\AccessToken;
 use Member;
 use OAuthAccessToken;
 use OAuthScope;
@@ -18,51 +20,21 @@ use SS_HTTPRequest;
 class ControllerExtension extends \Extension
 {
     /**
-     * @var array
-     */
-    private static $allowed_actions = [
-        'register'
-    ];
-
-    /**
+     * @param AbstractProvider $provider
+     * @param AccessToken $token
+     * @param string $providerName
      * @param SS_HTTPRequest $request
-     * @return mixed
      */
-    public function register(SS_HTTPRequest $request)
-    {
-        if (!$this->owner->validateState($request)) {
-            return Security::permissionFailure($this->owner, 'Invalid session state.');
-        }
-
-        $providerName = Session::get('oauth2.provider');
-        $redirectUri = Controller::join_links(Director::absoluteBaseURL(), $this->owner->Link(), 'register/');
-        $provider = Injector::inst()->get('Bigfork\SilverStripeOAuth\Client\Factory\ProviderFactory')
-            ->createProvider($providerName, $redirectUri);
+    public function afterGetAccessToken(
+        AbstractProvider $provider,
+        AccessToken $token,
+        $providerName,
+        SS_HTTPRequest $request
+    ) {
+        $user = $provider->getResourceOwner($token);
 
         try {
-            $token = $provider->getAccessToken('authorization_code', [
-                'code' => $request->getVar('code')
-            ]);
-
-            $user = $provider->getResourceOwner($token);
             $member = $this->memberFromResourceOwner($user, $providerName);
-            $existingToken = $member->AccessTokens()->filter(['Provider' => $providerName])->first();
-
-            if ($existingToken) {
-                $existingToken->delete();
-            }
-
-            $accessToken = OAuthAccessToken::createFromAccessToken($providerName, $token);
-            $accessToken->MemberID = $member->ID;
-            $accessToken->write();
-
-            $scopes = Session::get('oauth2.scope');
-            foreach ($scopes as $scope) {
-                $scope = OAuthScope::findOrMake($scope);
-                $accessToken->Scopes()->add($scope);
-            }
-        } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
-            return Security::permissionFailure($this->owner, 'Invalid access token.');
         } catch (TokenlessUserExistsException $e) {
             return Security::permissionFailure($this->owner, $e->getMessage());
         }
@@ -73,13 +45,6 @@ class ControllerExtension extends \Extension
         }
 
         $member->logIn();
-
-        $backUrl = Session::get('oauth2.backurl');
-        if (!$backUrl || !Director::is_site_url($backUrl)) {
-            $backUrl = Director::baseURL();
-        }
-
-        return $this->owner->redirect($backUrl);
     }
 
     /**
@@ -108,8 +73,7 @@ class ControllerExtension extends \Extension
 
         $overwriteExisting = false; // @todo
         if ($overwriteExisting || !$member->isInDB()) {
-            $mapper = Injector::inst()->get('Bigfork\SilverStripeOAuth\Client\Factory\MemberMapperFactory')
-                ->createMapper($providerName);
+            $mapper = Injector::inst()->get('MemberMapperFactory')->createMapper($providerName);
 
             $member = $mapper->map($member, $user);
             $member->write();

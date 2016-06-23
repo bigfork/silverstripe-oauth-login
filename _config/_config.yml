@@ -1,3 +1,6 @@
 Bigfork\SilverStripeOAuth\Client\Control\Controller:
   extensions:
     - Bigfork\SilverStripeOAuth\Client\Extension\ControllerExtension
+Injector:
+  MemberMapperFactory:
+    class: Bigfork\SilverStripeOAuth\Client\Factory\MemberMapperFactory

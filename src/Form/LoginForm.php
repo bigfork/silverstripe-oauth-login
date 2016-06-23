@@ -70,12 +70,10 @@ class LoginForm extends SilverStripeLoginForm
      */
     public function handleProvider($name)
     {
-        $controller = Injector::inst()->get('Bigfork\SilverStripeOAuth\Client\Control\Controller');
-        $redirectUri = Controller::join_links(Director::absoluteBaseURL(), $controller->Link(), 'register/');
-
-        $scopes = Config::inst()->get($this->authenticator_class, 'scopes');
-        $scope = isset($scopes[$name]) ? $scopes[$name] : ['email']; // We need at least an email address!
-        $url = Helper::buildAuthorisationUrl($name, $scope, $redirectUri);
+        $providers = Config::inst()->get($this->authenticator_class, 'providers');
+        $config = $providers[$name];
+        $scope = isset($config['scopes']) ? $config['scopes'] : ['email']; // We need at least an email address!
+        $url = Helper::buildAuthorisationUrl($name, $scope);
 
         return $this->getController()->redirect($url);
     }
