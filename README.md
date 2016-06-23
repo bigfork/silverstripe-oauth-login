@@ -2,9 +2,9 @@
 
 SilverStripe OAuth2-based login functionality, based on the PHP League's [OAuth2 client](http://oauth2-client.thephpleague.com/) and the [SilverStripe OAuth2 module](https://github.com/bigfork/silverstripe-oauth2).
 
-## IMPORTANT
+## \*\* IMPORTANT \*\*
 
-Please note that this module is still in development and should not be used in a production environment. It has not been fully tested, and may undergo significant changes before a stable release.
+Please note that this module is still in early development and should **not** be used in a production environment. It has not been fully tested, and may undergo significant changes before a stable release.
 
 ### What this module does
 This module adds “Log in with &lt;provider&gt;” buttons to SilverStripe’s default login form, which will authenticate a user with the chosen provider and store an OAuth access token. It also provides configurable access token scopes (or permission levels) and field mapping for storing user data on registration.
