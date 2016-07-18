@@ -53,6 +53,7 @@ class ControllerExtension extends \Extension
      *
      * @todo Implement $overwriteExisting. Could use priorities? I.e. Facebook data > Google data
      * @param ResourceOwnerInterface $user
+     * @param string $providerName
      * @return Member
      * @throws TokenlessUserExistsException
      */
@@ -74,12 +75,19 @@ class ControllerExtension extends \Extension
 
         $overwriteExisting = false; // @todo
         if ($overwriteExisting || !$member->isInDB()) {
-            $mapper = Injector::inst()->get('MemberMapperFactory')->createMapper($providerName);
-
-            $member = $mapper->map($member, $user);
+            $member = $this->getMapper($providerName)->map($member, $user);
             $member->write();
         }
 
         return $member;
+    }
+
+    /**
+     * @param string $providerName
+     * @return Bigfork\SilverStripeOAuth\Client\Mapper\MemberMapperInterface
+     */
+    protected function getMapper($providerName)
+    {
+        return Injector::inst()->get('MemberMapperFactory')->createMapper($providerName);
     }
 }

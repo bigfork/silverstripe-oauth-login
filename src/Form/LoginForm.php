@@ -42,7 +42,6 @@ class LoginForm extends SilverStripeLoginForm
     }
 
     /**
-     * @todo Re-do config
      * @todo Support for custom templates
      * @return FieldList
      */

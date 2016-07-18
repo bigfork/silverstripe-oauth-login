@@ -76,6 +76,7 @@ class GenericMemberMapper implements MemberMapperInterface
     protected function getMapping()
     {
         $mapping = Config::inst()->get(__CLASS__, 'mapping');
-        return (isset($mapping[$this->provider])) ? $mapping[$this->provider] : $mapping['default'];
+        $provider = $this->getProvider();
+        return (isset($mapping[$provider])) ? $mapping[$provider] : $mapping['default'];
     }
 }
