@@ -10,6 +10,11 @@ use Injector;
 class Authenticator extends \MemberAuthenticator
 {
     /**
+     * @var array
+     */
+    private static $providers = [];
+
+    /**
      * @return LoginForm
      */
     public static function get_login_form(Controller $controller)
