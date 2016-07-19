@@ -1,3 +1,5 @@
+Bigfork\SilverStripeOAuth\Client\Authenticator\Authenticator:
+  providers: []
 Bigfork\SilverStripeOAuth\Client\Control\Controller:
   extensions:
     - Bigfork\SilverStripeOAuth\Client\Extension\ControllerExtension
