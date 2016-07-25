@@ -36,13 +36,16 @@ class LoginForm extends SilverStripeLoginForm
      */
     public function getFields()
     {
-        return FieldList::create(
+        $fields = FieldList::create(
             HiddenField::create('AuthenticationMethod', null, $this->authenticator_class, $this)
         );
+
+        $this->extend('updateFields', $fields);
+
+        return $fields;
     }
 
     /**
-     * @todo Support for custom templates
      * @return FieldList
      */
     public function getActions()
@@ -53,10 +56,12 @@ class LoginForm extends SilverStripeLoginForm
         foreach ($providers as $provider => $config) {
             $name = isset($config['name']) ? $config['name'] : $provider;
             $action = FormAction::create('authenticate_' . $provider, 'Sign in with ' . $name)
-                ->setUseButtonTag(true);
+                ->setTemplate("FormAction_OAuth_{$provider}");
 
             $actions->push($action);
         }
+
+        $this->extend('updateActions', $actions);
 
         return $actions;
     }

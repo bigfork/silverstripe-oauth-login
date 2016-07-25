@@ -37,6 +37,19 @@ Bigfork\SilverStripeOAuth\Client\Authenticator\Authenticator:
       scopes: ['email', 'public_profile']
 ```
 
+## Customisation
+
+You can customise the look of the login actions for each provider by creating the relevant template, following the naming convention `FormAction_OAuth_<ProviderName>`. For example:
+
+```html
+<!-- themes/mysite/templates/forms/FormAction_OAuth_Facebook.ss -->
+<button type="submit" name="{$Name}" id="{$ID}" class="facebook-login">
+    Connect with Facebook
+</button>
+```
+
+The `Bigfork\SilverStripeOAuth\Client\Form\LoginForm` class also provides two extension points, `updateFields` and `updateActions` for further customisation.
+
 ---
 
 ## Concepts
@@ -82,5 +95,4 @@ Bigfork\SilverStripeOAuth\Client\Factory\MemberMapperFactory:
 ## Todo
 
 - Signing up via standard email + password, then attempting to log in using oauth with an account matching that email will currently fail. Probably needs to be handled better
-- See if templates/extension points can be used to make the login buttons more easily customisable
 - What should happen if I sign in with Facebook, then Google using the same email address? Should one profile's data overwrite the other? Priority based? Separate accounts?
