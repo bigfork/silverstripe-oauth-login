@@ -15,10 +15,14 @@ class Authenticator extends \MemberAuthenticator
     private static $providers = [];
 
     /**
-     * @return LoginForm
+     * @return LoginForm|null
      */
     public static function get_login_form(Controller $controller)
     {
+        if (!static::config()->providers) {
+            return null;
+        }
+
         return Injector::inst()->create('Bigfork\SilverStripeOAuth\Client\Form\LoginForm', $controller, 'LoginForm');
     }
 
