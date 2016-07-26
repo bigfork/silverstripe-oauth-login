@@ -29,6 +29,7 @@ class LoginForm extends SilverStripeLoginForm
     {
         parent::__construct($controller, $name, $this->getFields(), $this->getActions());
         $this->setHTMLID('OAuthAuthenticator');
+        $this->setTemplate('OAuthLoginForm');
     }
 
     /**
