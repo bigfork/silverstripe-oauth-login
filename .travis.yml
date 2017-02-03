@@ -7,7 +7,7 @@ cache: false
 
 env:
   matrix:
-    - DB=MYSQL CORE_RELEASE=3.3
+    - DB=MYSQL CORE_RELEASE=3.5
     - DB=MYSQL CORE_RELEASE=3
 
 before_script:
