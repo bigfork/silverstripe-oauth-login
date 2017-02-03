@@ -75,6 +75,8 @@ class LoginForm extends SilverStripeLoginForm
      */
     public function handleProvider($name)
     {
+        $this->extend('onBeforeHandleProvider', $name);
+
         $providers = Config::inst()->get($this->authenticator_class, 'providers');
         $config = $providers[$name];
         $scope = isset($config['scopes']) ? $config['scopes'] : ['email']; // We need at least an email address!
