@@ -3,14 +3,14 @@
 namespace Bigfork\SilverStripeOAuth\Client\Test\Form;
 
 use Bigfork\SilverStripeOAuth\Client\Form\LoginForm;
-use Bigfork\SilverStripeOAuth\Client\Test\TestCase;
+use Bigfork\SilverStripeOAuth\Client\Test\LoginTestCase;
 use Config;
 use Controller;
 use Director;
 use Injector;
 use SS_HTTPResponse;
 
-class LoginFormTest extends TestCase
+class LoginFormTest extends LoginTestCase
 {
     public function testGetActions()
     {

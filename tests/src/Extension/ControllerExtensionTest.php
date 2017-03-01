@@ -4,14 +4,14 @@ namespace Bigfork\SilverStripeOAuth\Client\Test\Extension;
 
 use Bigfork\SilverStripeOAuth\Client\Exception\TokenlessUserExistsException;
 use Bigfork\SilverStripeOAuth\Client\Extension\ControllerExtension;
-use Bigfork\SilverStripeOAuth\Client\Test\TestCase;
+use Bigfork\SilverStripeOAuth\Client\Test\LoginTestCase;
 use Controller;
 use Injector;
 use Member;
 use ReflectionMethod;
 use Session;
 
-class ControllerExtensionTest extends TestCase
+class ControllerExtensionTest extends LoginTestCase
 {
     protected static $fixture_file = 'ControllerExtensionTest.yml';
 

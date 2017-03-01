@@ -3,11 +3,11 @@
 namespace Bigfork\SilverStripeOAuth\Client\Test\Authenticator;
 
 use Bigfork\SilverStripeOAuth\Client\Authenticator\Authenticator;
-use Bigfork\SilverStripeOAuth\Client\Test\TestCase;
+use Bigfork\SilverStripeOAuth\Client\Test\LoginTestCase;
 use Config;
 use Controller;
 
-class AuthenticatorTest extends TestCase
+class AuthenticatorTest extends LoginTestCase
 {
     public function testGetLoginForm()
     {

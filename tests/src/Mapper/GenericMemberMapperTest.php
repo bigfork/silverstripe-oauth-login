@@ -3,12 +3,12 @@
 namespace Bigfork\SilverStripeOAuth\Client\Test\Mapper;
 
 use Bigfork\SilverStripeOAuth\Client\Mapper\GenericMemberMapper;
-use Bigfork\SilverStripeOAuth\Client\Test\TestCase;
+use Bigfork\SilverStripeOAuth\Client\Test\LoginTestCase;
 use Config;
 use Member;
 use ReflectionMethod;
 
-class GenericMemberMapperTest extends TestCase
+class GenericMemberMapperTest extends LoginTestCase
 {
     public function testSetAndGetProvider()
     {

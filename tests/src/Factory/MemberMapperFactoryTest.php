@@ -5,13 +5,13 @@ namespace Bigfork\SilverStripeOAuth\Client\Test\Factory;
 use Bigfork\SilverStripeOAuth\Client\Factory\MemberMapperFactory;
 use Bigfork\SilverStripeOAuth\Client\Mapper\GenericMemberMapper;
 use Bigfork\SilverStripeOAuth\Client\Mapper\MemberMapperInterface;
-use Bigfork\SilverStripeOAuth\Client\Test\TestCase;
+use Bigfork\SilverStripeOAuth\Client\Test\LoginTestCase;
 use Config;
 use Injector;
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
 use Member;
 
-class MemberMapperFactoryTest extends TestCase
+class MemberMapperFactoryTest extends LoginTestCase
 {
     public function testCreateMapper()
     {
