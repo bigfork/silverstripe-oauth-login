@@ -1,0 +1,5 @@
+en:
+  Bigfork\SilverStripeOAuth\Client\Authenticator\Authenticator:
+    TITLE: 'Social sign-on'
+  Bigfork\SilverStripeOAuth\Client\Form\LoginForm:
+    BUTTON: 'Sign in with {provider}'

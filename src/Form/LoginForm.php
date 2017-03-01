@@ -56,9 +56,14 @@ class LoginForm extends SilverStripeLoginForm
 
         foreach ($providers as $provider => $config) {
             $name = isset($config['name']) ? $config['name'] : $provider;
-            $action = FormAction::create('authenticate_' . $provider, 'Sign in with ' . $name)
-                ->setTemplate("FormAction_OAuth_{$provider}");
+            $text = _t(
+                'Bigfork\SilverStripeOAuth\Client\Form\LoginForm.BUTTON',
+                'Sign in with {provider}',
+                ['provider' => $name]
+            );
 
+            $action = FormAction::create('authenticate_' . $provider, $text)
+                ->setTemplate("FormAction_OAuth_{$provider}");
             $actions->push($action);
         }
 
