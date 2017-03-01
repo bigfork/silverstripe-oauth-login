@@ -22,17 +22,21 @@ To show a login button for a configured provider, you must add them to the new `
 Following on from the Facebook example in the [SilverStripe OAuth2 module documentation](https://github.com/bigfork/silverstripe-oauth#configuration):
 
 ```yml
-Bigfork\SilverStripeOAuth\Client\Factory\ProviderFactory:
-  providers:
-    'Facebook':
-      class: 'League\OAuth2\Client\Provider\Facebook'
-      constructor_options:
+Injector:
+  ProviderFactory:
+    properties:
+      providers:
+        'Facebook': '%$FacebookProvider'
+  FacebookProvider:
+    class: 'League\OAuth2\Client\Provider\Facebook'
+    constructor:
+      Options:
         clientId: '12345678987654321'
         clientSecret: 'geisjgoesingoi3h1521onnro12rin'
         graphApiVersion: 'v2.6'
 Bigfork\SilverStripeOAuth\Client\Authenticator\Authenticator:
   providers:
-    'Facebook': # Matches the internal name configured above
+    'Facebook': # Matches the key for '$%FacebookProvider' above
       name: 'The Facebooks'
       scopes: ['email', 'public_profile']
 ```
