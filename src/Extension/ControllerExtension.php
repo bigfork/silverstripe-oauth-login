@@ -3,17 +3,11 @@
 namespace Bigfork\SilverStripeOAuth\Client\Extension;
 
 use Bigfork\SilverStripeOAuth\Client\Exception\TokenlessUserExistsException;
-use Bigfork\SilverStripeOAuth\Client\Factory\ProviderFactory;
-use Controller;
-use Director;
 use Injector;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
-use League\OAuth2\Client\Token\AccessToken;
 use Member;
 use OAuthAccessToken;
-use OAuthScope;
-use Session;
 use Security;
 use SS_HTTPRequest;
 
@@ -21,30 +15,41 @@ class ControllerExtension extends \Extension
 {
     /**
      * @param AbstractProvider $provider
-     * @param AccessToken $token
+     * @param OAuthAccessToken $token
      * @param string $providerName
      * @param SS_HTTPRequest $request
      */
     public function afterGetAccessToken(
         AbstractProvider $provider,
-        AccessToken $token,
+        OAuthAccessToken $token,
         $providerName,
         SS_HTTPRequest $request
     ) {
-        $user = $provider->getResourceOwner($token);
+        $accessToken = $token->convertToAccessToken();
+        $user = $provider->getResourceOwner($accessToken);
 
         try {
+            // Find or create a member from the resource owner
             $member = $this->memberFromResourceOwner($user, $providerName);
-            $this->owner->setMember($member);
         } catch (TokenlessUserExistsException $e) {
             return Security::permissionFailure($this->owner, $e->getMessage());
         }
 
+        // Check whether the member can log in before we proceed
         $result = $member->canLogIn();
         if (!$result->valid()) {
             return Security::permissionFailure($this->owner, $result->message());
         }
 
+        // Clear old access tokens for this provider
+        // @todo make this behaviour optional, or just remove it in favour of pruning expired tokens?
+        $staleTokens = $member->AccessTokens()->filter([
+            'Provider' => $providerName,
+            'ID:not' => $token->ID
+        ]);
+        $staleTokens->removeAll();
+
+        // Log the member in
         $member->logIn();
     }
 

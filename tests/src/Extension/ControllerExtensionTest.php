@@ -19,6 +19,11 @@ class ControllerExtensionTest extends LoginTestCase
     {
         $mockAccessToken = $this->getConstructorlessMock('League\OAuth2\Client\Token\AccessToken');
 
+        $mockToken = $this->getMock('OAuthAccessToken', ['convertToAccessToken']);
+        $mockToken->expects($this->once())
+            ->method('convertToAccessToken')
+            ->will($this->returnValue($mockAccessToken));
+
         $mockResourceOwner = $this->getConstructorlessMock('League\OAuth2\Client\Provider\GenericResourceOwner');
 
         $mockProvider = $this->getConstructorlessMock(
@@ -44,11 +49,6 @@ class ControllerExtensionTest extends LoginTestCase
         $mockMember->expects($this->at(1))
             ->method('logIn');
 
-        $mockController = $this->getMock('Controller', ['setMember']);
-        $mockController->expects($this->once())
-            ->method('setMember')
-            ->with($mockMember);
-
         $mockExtension = $this->getConstructorlessMock(
             'Bigfork\SilverStripeOAuth\Client\Extension\ControllerExtension',
             ['memberFromResourceOwner']
@@ -58,13 +58,17 @@ class ControllerExtensionTest extends LoginTestCase
             ->with($mockResourceOwner, 'ProviderName')
             ->will($this->returnValue($mockMember));
 
-        $mockExtension->setOwner($mockController);
-        $mockExtension->afterGetAccessToken($mockProvider, $mockAccessToken, 'ProviderName', $mockRequest);
+        $mockExtension->afterGetAccessToken($mockProvider, $mockToken, 'ProviderName', $mockRequest);
     }
 
     public function testAfterGetAccessTokenMemberCannotLogIn()
     {
         $mockAccessToken = $this->getConstructorlessMock('League\OAuth2\Client\Token\AccessToken');
+
+        $mockToken = $this->getMock('OAuthAccessToken', ['convertToAccessToken']);
+        $mockToken->expects($this->once())
+            ->method('convertToAccessToken')
+            ->will($this->returnValue($mockAccessToken));
 
         $mockResourceOwner = $this->getConstructorlessMock('League\OAuth2\Client\Provider\GenericResourceOwner');
 
@@ -89,11 +93,6 @@ class ControllerExtensionTest extends LoginTestCase
             ->method('canLogIn')
             ->will($this->returnValue($mockValidationResult));
 
-        $mockController = $this->getMock('Controller', ['setMember']);
-        $mockController->expects($this->once())
-            ->method('setMember')
-            ->with($mockMember);
-
         $mockExtension = $this->getConstructorlessMock(
             'Bigfork\SilverStripeOAuth\Client\Extension\ControllerExtension',
             ['memberFromResourceOwner']
@@ -103,8 +102,7 @@ class ControllerExtensionTest extends LoginTestCase
             ->with($mockResourceOwner, 'ProviderName')
             ->will($this->returnValue($mockMember));
 
-        $mockExtension->setOwner($mockController);
-        $response = $mockExtension->afterGetAccessToken($mockProvider, $mockAccessToken, 'ProviderName', $mockRequest);
+        $response = $mockExtension->afterGetAccessToken($mockProvider, $mockToken, 'ProviderName', $mockRequest);
 
         $this->assertEquals(403, $response->getStatusCode());
     }
@@ -112,6 +110,11 @@ class ControllerExtensionTest extends LoginTestCase
     public function testAfterGetAccessTokenUserExistsWithoutToken()
     {
         $mockAccessToken = $this->getConstructorlessMock('League\OAuth2\Client\Token\AccessToken');
+
+        $mockToken = $this->getMock('OAuthAccessToken', ['convertToAccessToken']);
+        $mockToken->expects($this->once())
+            ->method('convertToAccessToken')
+            ->will($this->returnValue($mockAccessToken));
 
         $mockResourceOwner = $this->getConstructorlessMock('League\OAuth2\Client\Provider\GenericResourceOwner');
 
@@ -135,8 +138,7 @@ class ControllerExtensionTest extends LoginTestCase
             ->with($mockResourceOwner, 'ProviderName')
             ->will($this->throwException(new TokenlessUserExistsException('Test error message')));
 
-        $mockExtension->setOwner(new Controller);
-        $response = $mockExtension->afterGetAccessToken($mockProvider, $mockAccessToken, 'ProviderName', $mockRequest);
+        $response = $mockExtension->afterGetAccessToken($mockProvider, $mockToken, 'ProviderName', $mockRequest);
 
         $this->assertEquals(403, $response->getStatusCode());
     }

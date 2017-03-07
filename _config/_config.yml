@@ -4,3 +4,9 @@ Bigfork\SilverStripeOAuth\Client\Control\Controller:
 Injector:
   MemberMapperFactory:
     class: Bigfork\SilverStripeOAuth\Client\Factory\MemberMapperFactory
+Member:
+  extensions:
+    - Bigfork\SilverStripeOAuth\Client\Extension\MemberExtension
+OAuthAccessToken:
+  extensions:
+    - Bigfork\SilverStripeOAuth\Client\Extension\OAuthAccessTokenExtension
