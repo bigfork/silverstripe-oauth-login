@@ -3,9 +3,9 @@
 namespace Bigfork\SilverStripeOAuth\Client\Test\Extension;
 
 use Bigfork\SilverStripeOAuth\Client\Extension\MemberExtension;
-use Bigfork\SilverStripeOAuth\Client\Test\TestCase;
+use Bigfork\SilverStripeOAuth\Client\Test\LoginTestCase;
 
-class MemberExtensionTest extends TestCase
+class MemberExtensionTest extends LoginTestCase
 {
     public function testOnBeforeDelete()
     {
