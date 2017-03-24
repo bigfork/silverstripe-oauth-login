@@ -189,6 +189,7 @@ class ControllerExtensionTest extends LoginTestCase
         $reflectionMethod->setAccessible(true);
 
         $this->assertEquals($mockMember, $reflectionMethod->invoke($mockExtension, $mockResourceOwner, 'ProviderName'));
+        $this->assertEquals('ProviderName', $mockMember->OAuthSource, 'OAuth source was not stored against the member');
     }
 
     /**

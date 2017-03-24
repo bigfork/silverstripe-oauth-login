@@ -13,7 +13,6 @@ class OAuthAccessTokenExtension extends \Extension
         'Member' => 'Member'
     ];
 
-
     /**
      * {@inheritdoc}
      */

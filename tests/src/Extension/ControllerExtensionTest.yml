@@ -3,3 +3,4 @@ Member:
     FirstName: 'Tess'
     Surname: 'Tickles'
     Email: 'tesstickles@example.com'
+    OAuthSource: ''

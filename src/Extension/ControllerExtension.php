@@ -51,7 +51,10 @@ class ControllerExtension extends \Extension
             'Provider' => $providerName,
             'ID:not' => $token->ID
         ]);
-        $staleTokens->removeAll();
+
+        foreach ($staleTokens as $token) {
+            $token->delete();
+        }
 
         // Log the member in
         $member->logIn();
@@ -76,7 +79,7 @@ class ControllerExtension extends \Extension
             $member = Member::create();
         }
 
-        if ($member->isInDB() && !$member->AccessTokens()->count()) {
+        if ($member->isInDB() && !$member->OAuthSource) {
             throw new TokenlessUserExistsException(
                 'A user with the email address linked to this account already exists.'
             );
@@ -85,6 +88,7 @@ class ControllerExtension extends \Extension
         $overwriteExisting = false; // @todo
         if ($overwriteExisting || !$member->isInDB()) {
             $member = $this->getMapper($providerName)->map($member, $user);
+            $member->OAuthSource = $providerName;
             $member->write();
         }
 

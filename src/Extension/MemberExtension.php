@@ -9,10 +9,16 @@ class MemberExtension extends \Extension
     /**
      * @var array
      */
+    private static $db = [
+        'OAuthSource' => 'Varchar(255)'
+    ];
+
+    /**
+     * @var array
+     */
     private static $has_many = [
         'AccessTokens' => 'OAuthAccessToken'
     ];
-
 
     /**
      * {@inheritdoc}
