@@ -19,10 +19,12 @@ class ControllerExtensionTest extends LoginTestCase
     {
         $mockAccessToken = $this->getConstructorlessMock('League\OAuth2\Client\Token\AccessToken');
 
-        $mockToken = $this->getMock('OAuthAccessToken', ['convertToAccessToken']);
-        $mockToken->expects($this->once())
+        $mockToken = $this->getMock('OAuthAccessToken', ['convertToAccessToken', 'write']);
+        $mockToken->expects($this->at(0))
             ->method('convertToAccessToken')
             ->will($this->returnValue($mockAccessToken));
+        $mockToken->expects($this->at(1))
+            ->method('write');
 
         $mockResourceOwner = $this->getConstructorlessMock('League\OAuth2\Client\Provider\GenericResourceOwner');
 
@@ -49,6 +51,9 @@ class ControllerExtensionTest extends LoginTestCase
         $mockMember->expects($this->at(1))
             ->method('logIn');
 
+        // Give the mock member an ID
+        $mockMember->ID = 123;
+
         $mockExtension = $this->getConstructorlessMock(
             'Bigfork\SilverStripeOAuth\Client\Extension\ControllerExtension',
             ['memberFromResourceOwner']
@@ -59,6 +64,7 @@ class ControllerExtensionTest extends LoginTestCase
             ->will($this->returnValue($mockMember));
 
         $mockExtension->afterGetAccessToken($mockProvider, $mockToken, 'ProviderName', $mockRequest);
+        $this->assertEquals(123, $mockToken->MemberID, 'Token not related to member');
     }
 
     public function testAfterGetAccessTokenMemberCannotLogIn()

@@ -41,6 +41,10 @@ class ControllerExtension extends \Extension
             return Security::permissionFailure($this->owner, $result->message());
         }
 
+        // Store the access token against the member
+        $token->MemberID = $member->ID;
+        $token->write();
+
         // Clear old access tokens for this provider
         // @todo make this behaviour optional, or just remove it in favour of pruning expired tokens?
         $staleTokens = $member->AccessTokens()->filter([
