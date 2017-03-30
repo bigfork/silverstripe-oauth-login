@@ -2,36 +2,28 @@
 
 namespace Bigfork\SilverStripeOAuth\Client\Extension;
 
-use Bigfork\SilverStripeOAuth\Client\Exception\TokenlessUserExistsException;
 use Injector;
-use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
 use Member;
 use OAuthAccessToken;
+use OAuthPassport;
 use Security;
 use SS_HTTPRequest;
+use ValidationException;
 
 class ControllerExtension extends \Extension
 {
     /**
-     * @param AbstractProvider $provider
      * @param OAuthAccessToken $token
-     * @param string $providerName
      * @param SS_HTTPRequest $request
+     * @return mixed
      */
-    public function afterGetAccessToken(
-        AbstractProvider $provider,
-        OAuthAccessToken $token,
-        $providerName,
-        SS_HTTPRequest $request
-    ) {
-        $accessToken = $token->convertToAccessToken();
-        $user = $provider->getResourceOwner($accessToken);
-
+    public function afterGetAccessToken(OAuthAccessToken $token, SS_HTTPRequest $request)
+    {
         try {
-            // Find or create a member from the resource owner
-            $member = $this->memberFromResourceOwner($user, $providerName);
-        } catch (TokenlessUserExistsException $e) {
+            // Find or create a member from the token
+            $member = $this->findOrCreateMember($token);
+        } catch (ValidationException $e) {
             return Security::permissionFailure($this->owner, $e->getMessage());
         }
 
@@ -48,7 +40,7 @@ class ControllerExtension extends \Extension
         // Clear old access tokens for this provider
         // @todo make this behaviour optional, or just remove it in favour of pruning expired tokens?
         $staleTokens = $member->AccessTokens()->filter([
-            'Provider' => $providerName,
+            'Provider' => $token->Provider,
             'ID:not' => $token->ID
         ]);
 
@@ -61,36 +53,54 @@ class ControllerExtension extends \Extension
     }
 
     /**
-     * Find or create a member from the given resource owner ("user")
+     * Find or create a member from the given token
      *
-     * @todo Implement $overwriteExisting. Could use priorities? I.e. Facebook data > Google data
-     * @param ResourceOwnerInterface $user
-     * @param string $providerName
+     * @param OAuthAccessToken $token
      * @return Member
-     * @throws TokenlessUserExistsException
      */
-    protected function memberFromResourceOwner(ResourceOwnerInterface $user, $providerName)
+    protected function findOrCreateMember(OAuthAccessToken $token)
     {
-        $member = Member::get()->filter([
-            'Email' => $user->getEmail()
+        $accessToken = $token->convertToAccessToken();
+        $user = $token->getTokenProvider()->getResourceOwner($accessToken);
+
+        $passport = OAuthPassport::get()->filter([
+            'Identifier' => $user->getId(),
+            'Token.Provider' => $token->Provider
         ])->first();
 
-        if (!$member) {
-            $member = Member::create();
+        if (!$passport) {
+            // Create the new member
+            $member = $this->createMember($token);
+
+            // Create a passport for the new member
+            $passport = OAuthPassport::create()->update([
+                'Identifier' => $user->getId(),
+                'MemberID' => $member->ID
+            ]);
         }
 
-        if ($member->isInDB() && !$member->OAuthSource) {
-            throw new TokenlessUserExistsException(
-                'A user with the email address linked to this account already exists.'
-            );
-        }
+        // The new token is now the "active" token for this passport
+        $passport->TokenID = $token->ID;
+        $passport->write();
 
-        $overwriteExisting = false; // @todo
-        if ($overwriteExisting || !$member->isInDB()) {
-            $member = $this->getMapper($providerName)->map($member, $user);
-            $member->OAuthSource = $providerName;
-            $member->write();
-        }
+        return $passport->Member();
+    }
+
+    /**
+     * Create a member from the given token
+     *
+     * @param OAuthAccessToken $token
+     * @return Member
+     */
+    protected function createMember(OAuthAccessToken $token)
+    {
+        $accessToken = $token->convertToAccessToken();
+        $user = $token->getTokenProvider()->getResourceOwner($accessToken);
+
+        $member = Member::create();
+        $member = $this->getMapper($token->Provider)->map($member, $user);
+        $member->OAuthSource = $token->Provider;
+        $member->write();
 
         return $member;
     }

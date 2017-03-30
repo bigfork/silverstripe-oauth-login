@@ -11,7 +11,7 @@
 	],
 	"license": "BSD-3-Clause",
 	"require": {
-		"bigfork/silverstripe-oauth": "^0.2",
+		"bigfork/silverstripe-oauth": "^0.3",
         "silverstripe/framework": "^3.3"
 	},
 	"require-dev": {

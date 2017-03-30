@@ -2,7 +2,6 @@
 
 namespace Bigfork\SilverStripeOAuth\Client\Test\Extension;
 
-use Bigfork\SilverStripeOAuth\Client\Exception\TokenlessUserExistsException;
 use Bigfork\SilverStripeOAuth\Client\Extension\ControllerExtension;
 use Bigfork\SilverStripeOAuth\Client\Test\LoginTestCase;
 use Controller;
@@ -17,26 +16,9 @@ class ControllerExtensionTest extends LoginTestCase
 
     public function testAfterGetAccessToken()
     {
-        $mockAccessToken = $this->getConstructorlessMock('League\OAuth2\Client\Token\AccessToken');
-
-        $mockToken = $this->getMock('OAuthAccessToken', ['convertToAccessToken', 'write']);
-        $mockToken->expects($this->at(0))
-            ->method('convertToAccessToken')
-            ->will($this->returnValue($mockAccessToken));
-        $mockToken->expects($this->at(1))
+        $mockToken = $this->getMock('OAuthAccessToken', ['write']);
+        $mockToken->expects($this->once())
             ->method('write');
-
-        $mockResourceOwner = $this->getConstructorlessMock('League\OAuth2\Client\Provider\GenericResourceOwner');
-
-        $mockProvider = $this->getConstructorlessMock(
-            'League\OAuth2\Client\Provider\GenericProvider',
-            ['getResourceOwner']
-        );
-        $mockProvider->expects($this->once())
-            ->method('getResourceOwner')
-            ->with($mockAccessToken)
-            ->will($this->returnValue($mockResourceOwner));
-
         $mockRequest = $this->getConstructorlessMock('SS_HTTPRequest');
 
         $mockValidationResult = $this->getMock('ValidationResult', ['valid']);
@@ -56,37 +38,20 @@ class ControllerExtensionTest extends LoginTestCase
 
         $mockExtension = $this->getConstructorlessMock(
             'Bigfork\SilverStripeOAuth\Client\Extension\ControllerExtension',
-            ['memberFromResourceOwner']
+            ['findOrCreateMember']
         );
         $mockExtension->expects($this->once())
-            ->method('memberFromResourceOwner')
-            ->with($mockResourceOwner, 'ProviderName')
+            ->method('findOrCreateMember')
+            ->with($mockToken)
             ->will($this->returnValue($mockMember));
 
-        $mockExtension->afterGetAccessToken($mockProvider, $mockToken, 'ProviderName', $mockRequest);
+        $mockExtension->afterGetAccessToken($mockToken, $mockRequest);
         $this->assertEquals(123, $mockToken->MemberID, 'Token not related to member');
     }
 
     public function testAfterGetAccessTokenMemberCannotLogIn()
     {
-        $mockAccessToken = $this->getConstructorlessMock('League\OAuth2\Client\Token\AccessToken');
-
-        $mockToken = $this->getMock('OAuthAccessToken', ['convertToAccessToken']);
-        $mockToken->expects($this->once())
-            ->method('convertToAccessToken')
-            ->will($this->returnValue($mockAccessToken));
-
-        $mockResourceOwner = $this->getConstructorlessMock('League\OAuth2\Client\Provider\GenericResourceOwner');
-
-        $mockProvider = $this->getConstructorlessMock(
-            'League\OAuth2\Client\Provider\GenericProvider',
-            ['getResourceOwner']
-        );
-        $mockProvider->expects($this->once())
-            ->method('getResourceOwner')
-            ->with($mockAccessToken)
-            ->will($this->returnValue($mockResourceOwner));
-
+        $mockToken = $this->getMock('OAuthAccessToken');
         $mockRequest = $this->getConstructorlessMock('SS_HTTPRequest');
 
         $mockValidationResult = $this->getMock('ValidationResult', ['valid']);
@@ -101,27 +66,77 @@ class ControllerExtensionTest extends LoginTestCase
 
         $mockExtension = $this->getConstructorlessMock(
             'Bigfork\SilverStripeOAuth\Client\Extension\ControllerExtension',
-            ['memberFromResourceOwner']
+            ['findOrCreateMember']
         );
         $mockExtension->expects($this->once())
-            ->method('memberFromResourceOwner')
-            ->with($mockResourceOwner, 'ProviderName')
+            ->method('findOrCreateMember')
+            ->with($mockToken)
             ->will($this->returnValue($mockMember));
 
-        $response = $mockExtension->afterGetAccessToken($mockProvider, $mockToken, 'ProviderName', $mockRequest);
+        $response = $mockExtension->afterGetAccessToken($mockToken, $mockRequest);
 
         $this->assertEquals(403, $response->getStatusCode());
     }
 
-    public function testAfterGetAccessTokenUserExistsWithoutToken()
+    public function testFindOrCreateMember()
     {
         $mockAccessToken = $this->getConstructorlessMock('League\OAuth2\Client\Token\AccessToken');
 
-        $mockToken = $this->getMock('OAuthAccessToken', ['convertToAccessToken']);
-        $mockToken->expects($this->once())
+        $mockResourceOwner = $this->getConstructorlessMock(
+            'League\OAuth2\Client\Provider\GenericResourceOwner',
+            ['getId']
+        );
+        $mockResourceOwner->expects($this->exactly(2))
+            ->method('getId')
+            ->will($this->returnValue(123456789));
+
+        $mockProvider = $this->getConstructorlessMock(
+            'League\OAuth2\Client\Provider\GenericProvider',
+            ['getResourceOwner']
+        );
+        $mockProvider->expects($this->once())
+            ->method('getResourceOwner')
+            ->with($mockAccessToken)
+            ->will($this->returnValue($mockResourceOwner));
+
+        $mockToken = $this->getMock('OAuthAccessToken', ['convertToAccessToken', 'getTokenProvider']);
+        $mockToken->expects($this->at(0))
             ->method('convertToAccessToken')
             ->will($this->returnValue($mockAccessToken));
+        $mockToken->expects($this->at(1))
+            ->method('getTokenProvider')
+            ->will($this->returnValue($mockProvider));
+        $mockToken->ID = 123;
 
+        $member = $this->objFromFixture('Member', 'member1');
+
+        $mockExtension = $this->getConstructorlessMock(
+            'Bigfork\SilverStripeOAuth\Client\Extension\ControllerExtension',
+            ['createMember']
+        );
+        $mockExtension->expects($this->once())
+            ->method('createMember')
+            ->with($mockToken)
+            ->will($this->returnValue($member));
+        $mockExtension->setOwner(new Controller);
+
+        $reflectionMethod = new ReflectionMethod(
+            'Bigfork\SilverStripeOAuth\Client\Extension\ControllerExtension',
+            'findOrCreateMember'
+        );
+        $reflectionMethod->setAccessible(true);
+
+        $this->assertEquals($member, $reflectionMethod->invoke($mockExtension, $mockToken));
+
+        $passport = $member->Passports()->first();
+        $this->assertNotNull($passport);
+        $this->assertEquals(123, $passport->TokenID);
+        $this->assertEquals(123456789, $passport->Identifier);
+    }
+
+    public function testCreateMember()
+    {
+        $mockAccessToken = $this->getConstructorlessMock('League\OAuth2\Client\Token\AccessToken');
         $mockResourceOwner = $this->getConstructorlessMock('League\OAuth2\Client\Provider\GenericResourceOwner');
 
         $mockProvider = $this->getConstructorlessMock(
@@ -133,35 +148,14 @@ class ControllerExtensionTest extends LoginTestCase
             ->with($mockAccessToken)
             ->will($this->returnValue($mockResourceOwner));
 
-        $mockRequest = $this->getConstructorlessMock('SS_HTTPRequest');
-
-        $mockExtension = $this->getConstructorlessMock(
-            'Bigfork\SilverStripeOAuth\Client\Extension\ControllerExtension',
-            ['memberFromResourceOwner']
-        );
-        $mockExtension->expects($this->once())
-            ->method('memberFromResourceOwner')
-            ->with($mockResourceOwner, 'ProviderName')
-            ->will($this->throwException(new TokenlessUserExistsException('Test error message')));
-
-        $response = $mockExtension->afterGetAccessToken($mockProvider, $mockToken, 'ProviderName', $mockRequest);
-
-        $this->assertEquals(403, $response->getStatusCode());
-    }
-
-    public function testMemberFromResourceOwner()
-    {
-        $mockResourceOwner = $this->getConstructorlessMock(
-            'League\OAuth2\Client\Provider\GenericResourceOwner',
-            ['getEmail']
-        );
-        $mockResourceOwner->expects($this->once())
-            ->method('getEmail')
-            ->will($this->returnValue('foo@bar.com'));
-
-        $mockMember = $this->getMock('Member', ['write']);
-        $mockMember->expects($this->once())
-            ->method('write');
+        $mockToken = $this->getMock('OAuthAccessToken', ['convertToAccessToken', 'getTokenProvider']);
+        $mockToken->expects($this->at(0))
+            ->method('convertToAccessToken')
+            ->will($this->returnValue($mockAccessToken));
+        $mockToken->expects($this->at(1))
+            ->method('getTokenProvider')
+            ->will($this->returnValue($mockProvider));
+        $mockToken->Provider = 'ProviderName';
 
         $mockMemberMapper = $this->getConstructorlessMock(
             'Bigfork\SilverStripeOAuth\Client\Mapper\GenericMemberMapper',
@@ -170,7 +164,7 @@ class ControllerExtensionTest extends LoginTestCase
         $mockMemberMapper->expects($this->once())
             ->method('map')
             ->with($this->isInstanceOf('Member'), $mockResourceOwner)
-            ->will($this->returnValue($mockMember));
+            ->will($this->returnArgument(0));
 
         $mockExtension = $this->getConstructorlessMock(
             'Bigfork\SilverStripeOAuth\Client\Extension\ControllerExtension',
@@ -184,39 +178,13 @@ class ControllerExtensionTest extends LoginTestCase
 
         $reflectionMethod = new ReflectionMethod(
             'Bigfork\SilverStripeOAuth\Client\Extension\ControllerExtension',
-            'memberFromResourceOwner'
+            'createMember'
         );
         $reflectionMethod->setAccessible(true);
 
-        $this->assertEquals($mockMember, $reflectionMethod->invoke($mockExtension, $mockResourceOwner, 'ProviderName'));
-        $this->assertEquals('ProviderName', $mockMember->OAuthSource, 'OAuth source was not stored against the member');
-    }
-
-    /**
-     * @expectedException Bigfork\SilverStripeOAuth\Client\Exception\TokenlessUserExistsException
-     */
-    public function testMemberFromResourceOwnerMemberExists()
-    {
-        $member = $this->objFromFixture('Member', 'member1');
-        $email = $member->Email;
-
-        $mockResourceOwner = $this->getConstructorlessMock(
-            'League\OAuth2\Client\Provider\GenericResourceOwner',
-            ['getEmail']
-        );
-        $mockResourceOwner->expects($this->once())
-            ->method('getEmail')
-            ->will($this->returnValue($email));
-
-        $extension = new ControllerExtension;
-        $extension->setOwner(new Controller);
-        $reflectionMethod = new ReflectionMethod(
-            'Bigfork\SilverStripeOAuth\Client\Extension\ControllerExtension',
-            'memberFromResourceOwner'
-        );
-        $reflectionMethod->setAccessible(true);
-
-        $reflectionMethod->invoke($extension, $mockResourceOwner, 'ProviderName');
+        $member = $reflectionMethod->invoke($mockExtension, $mockToken);
+        $this->assertInstanceOf('Member', $member);
+        $this->assertEquals('ProviderName', $member->OAuthSource);
     }
 
     public function testGetMapper()

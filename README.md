@@ -58,13 +58,13 @@ The `Bigfork\SilverStripeOAuth\Client\Form\LoginForm` class also provides two ex
 
 ## Concepts
 
-### Minimum scope requirements
+### Passports
 
-At the very minimum, the provider must return an email address used to associate a token with a user. Email-less authentication may be possible in future releases, though has not been investigated yet.
+Each member that authenticates via an OAuth provider is assigned a “Passport” - a record which is unique to each OAuth account owner. This allows one SilverStripe account to be linked to multiple OAuth providers, or even linked to multiple individual accounts on the same provider. While both of those are possible, neither is the default behaviour for this module: by default, each new OAuth account will create a new SilverStripe member record. See the [multiple providers/accounts](#multiple-providers-accounts) and [email collisions](#email-collisions) sections for more information.
 
 ### Stale tokens
 
-After successfully authenticating, this module will currently remove any old access tokens for the provider used for authentication as they are effectively stale. This behaviour may change in future releases.
+After successfully authenticating, this module will currently remove any old access tokens for the provider used for authentication, as they are regarded as stale (for the purposes of logging in at least). This behaviour is likely to change in future releases.
 
 ### Mappers
 
@@ -94,10 +94,27 @@ Bigfork\SilverStripeOAuth\Client\Factory\MemberMapperFactory:
     'Facebook': 'Mysite\MyFacebookMapperClass'
 ```
 
+### Multiple providers/accounts
+
+The default behaviour for this module is to treat each OAuth account as a separate SilverStripe account. This is because every website will have bespoke requirements on how multiple accounts should be treated, for example:
+
+- If I sign up with Facebook, and then want to also link my Twitter account - which account’s information (i.e. name, email address) should take priority?
+- If I want to link my Twitter account to SilverStripe account A, but it already belongs to SilverStripe account B because I already signed up with it, what happens? Should this be disallowed, or should account B be deleted?
+- What if I’m a very awkward person and have two Facebook accounts that I want linked to the same SilverStripe account?
+
+It is up to you if, or how, to handle scenarios like this. The typical solution would be to add buttons for “Link X Account” that are shown to users in their account once they’ve authenticated initially.
+
+### Email collisions
+
+As it’s possible, and likely, for users to have accounts for multiple OAuth providers that each have the same email address, you may encounter an error similar to _“Can't overwrite existing member #123 with identical identifier (Email = foo@bar.com)”_. This is because the default behaviour for SilverStripe is to ensure that every member record has a unique email address. There are a few different ways to work around this:
+
+- Change the `Member.unique_identifier_field` config setting to something other than `Email` (for example, `ID`)
+- Update the config for [`GenericMemberMapper`](#using-genericmembermapper) for your providers, but omit the `Email` field
+- Create a [custom mapper](#using-a-custom-mapper) that doesn’t import email addresses
+
 ---
 
 ## Todo
 
-- Signing up via standard email + password, then attempting to log in using oauth with an account matching that email will currently fail. Probably needs to be handled better
-- What should happen if I sign in with Facebook, then Google using the same email address? Should one profile's data overwrite the other? Priority based? Separate accounts?
+- Add basic example of how to link multiple oauth accounts to a single SilverStripe account
 - Make the default behaviour of only allowing one access token per provider on each member optional, or just remove it

@@ -9,6 +9,13 @@ class OAuthAccessTokenExtension extends \Extension
     /**
      * @var array
      */
+    private static $belongs_to = [
+        'Passport' => 'OAuthPassport'
+    ];
+
+    /**
+     * @var array
+     */
     private static $has_one = [
         'Member' => 'Member'
     ];

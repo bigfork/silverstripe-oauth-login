@@ -17,7 +17,8 @@ class MemberExtension extends \Extension
      * @var array
      */
     private static $has_many = [
-        'AccessTokens' => 'OAuthAccessToken'
+        'AccessTokens' => 'OAuthAccessToken',
+        'Passports' => 'OAuthPassport'
     ];
 
     /**
