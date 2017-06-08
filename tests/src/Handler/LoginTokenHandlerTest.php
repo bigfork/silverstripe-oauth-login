@@ -1,8 +1,8 @@
 <?php
 
-namespace Bigfork\SilverStripeOAuth\Client\Test\Extension;
+namespace Bigfork\SilverStripeOAuth\Client\Test\Handler;
 
-use Bigfork\SilverStripeOAuth\Client\Extension\ControllerExtension;
+use Bigfork\SilverStripeOAuth\Client\Handler\LoginTokenHandler;
 use Bigfork\SilverStripeOAuth\Client\Test\LoginTestCase;
 use Controller;
 use Injector;
@@ -10,16 +10,14 @@ use Member;
 use ReflectionMethod;
 use Session;
 
-class ControllerExtensionTest extends LoginTestCase
+class LoginTokenHandlerTest extends LoginTestCase
 {
-    protected static $fixture_file = 'ControllerExtensionTest.yml';
+    protected static $fixture_file = 'LoginTokenHandlerTest.yml';
 
-    public function testAfterGetAccessToken()
+    public function testHandleToken()
     {
-        $mockToken = $this->getMock('OAuthAccessToken', ['write']);
-        $mockToken->expects($this->once())
-            ->method('write');
-        $mockRequest = $this->getConstructorlessMock('SS_HTTPRequest');
+        $mockAccessToken = $this->getConstructorlessMock('League\OAuth2\Client\Token\AccessToken');
+        $mockProvider = $this->getConstructorlessMock('League\OAuth2\Client\Provider\GenericProvider');
 
         $mockValidationResult = $this->getMock('ValidationResult', ['valid']);
         $mockValidationResult->expects($this->once())
@@ -33,26 +31,22 @@ class ControllerExtensionTest extends LoginTestCase
         $mockMember->expects($this->at(1))
             ->method('logIn');
 
-        // Give the mock member an ID
-        $mockMember->ID = 123;
-
-        $mockExtension = $this->getConstructorlessMock(
-            'Bigfork\SilverStripeOAuth\Client\Extension\ControllerExtension',
+        $mockHandler = $this->getMock(
+            'Bigfork\SilverStripeOAuth\Client\Handler\LoginTokenHandler',
             ['findOrCreateMember']
         );
-        $mockExtension->expects($this->once())
+        $mockHandler->expects($this->once())
             ->method('findOrCreateMember')
-            ->with($mockToken)
+            ->with($mockAccessToken, $mockProvider)
             ->will($this->returnValue($mockMember));
 
-        $mockExtension->afterGetAccessToken($mockToken, $mockRequest);
-        $this->assertEquals(123, $mockToken->MemberID, 'Token not related to member');
+        $mockHandler->handleToken($mockAccessToken, $mockProvider);
     }
 
     public function testAfterGetAccessTokenMemberCannotLogIn()
     {
-        $mockToken = $this->getMock('OAuthAccessToken');
-        $mockRequest = $this->getConstructorlessMock('SS_HTTPRequest');
+        $mockAccessToken = $this->getConstructorlessMock('League\OAuth2\Client\Token\AccessToken');
+        $mockProvider = $this->getConstructorlessMock('League\OAuth2\Client\Provider\GenericProvider');
 
         $mockValidationResult = $this->getMock('ValidationResult', ['valid']);
         $mockValidationResult->expects($this->once())
@@ -64,17 +58,16 @@ class ControllerExtensionTest extends LoginTestCase
             ->method('canLogIn')
             ->will($this->returnValue($mockValidationResult));
 
-        $mockExtension = $this->getConstructorlessMock(
-            'Bigfork\SilverStripeOAuth\Client\Extension\ControllerExtension',
+        $mockHandler = $this->getMock(
+            'Bigfork\SilverStripeOAuth\Client\Handler\LoginTokenHandler',
             ['findOrCreateMember']
         );
-        $mockExtension->expects($this->once())
+        $mockHandler->expects($this->once())
             ->method('findOrCreateMember')
-            ->with($mockToken)
+            ->with($mockAccessToken, $mockProvider)
             ->will($this->returnValue($mockMember));
 
-        $response = $mockExtension->afterGetAccessToken($mockToken, $mockRequest);
-
+        $response = $mockHandler->handleToken($mockAccessToken, $mockProvider);
         $this->assertEquals(403, $response->getStatusCode());
     }
 
@@ -99,38 +92,27 @@ class ControllerExtensionTest extends LoginTestCase
             ->with($mockAccessToken)
             ->will($this->returnValue($mockResourceOwner));
 
-        $mockToken = $this->getMock('OAuthAccessToken', ['convertToAccessToken', 'getTokenProvider']);
-        $mockToken->expects($this->at(0))
-            ->method('convertToAccessToken')
-            ->will($this->returnValue($mockAccessToken));
-        $mockToken->expects($this->at(1))
-            ->method('getTokenProvider')
-            ->will($this->returnValue($mockProvider));
-        $mockToken->ID = 123;
-
         $member = $this->objFromFixture('Member', 'member1');
 
-        $mockExtension = $this->getConstructorlessMock(
-            'Bigfork\SilverStripeOAuth\Client\Extension\ControllerExtension',
+        $mockHandler = $this->getMock(
+            'Bigfork\SilverStripeOAuth\Client\Handler\LoginTokenHandler',
             ['createMember']
         );
-        $mockExtension->expects($this->once())
+        $mockHandler->expects($this->once())
             ->method('createMember')
-            ->with($mockToken)
+            ->with($mockAccessToken, $mockProvider)
             ->will($this->returnValue($member));
-        $mockExtension->setOwner(new Controller);
 
         $reflectionMethod = new ReflectionMethod(
-            'Bigfork\SilverStripeOAuth\Client\Extension\ControllerExtension',
+            'Bigfork\SilverStripeOAuth\Client\Handler\LoginTokenHandler',
             'findOrCreateMember'
         );
         $reflectionMethod->setAccessible(true);
 
-        $this->assertEquals($member, $reflectionMethod->invoke($mockExtension, $mockToken));
+        $this->assertEquals($member, $reflectionMethod->invoke($mockHandler, $mockAccessToken, $mockProvider));
 
         $passport = $member->Passports()->first();
         $this->assertNotNull($passport);
-        $this->assertEquals(123, $passport->TokenID);
         $this->assertEquals(123456789, $passport->Identifier);
     }
 
@@ -148,14 +130,11 @@ class ControllerExtensionTest extends LoginTestCase
             ->with($mockAccessToken)
             ->will($this->returnValue($mockResourceOwner));
 
-        $mockToken = $this->getMock('OAuthAccessToken', ['convertToAccessToken', 'getTokenProvider']);
-        $mockToken->expects($this->at(0))
-            ->method('convertToAccessToken')
-            ->will($this->returnValue($mockAccessToken));
-        $mockToken->expects($this->at(1))
-            ->method('getTokenProvider')
-            ->will($this->returnValue($mockProvider));
-        $mockToken->Provider = 'ProviderName';
+        $mockSession = $this->getConstructorlessMock('Session', ['inst_get']);
+        $mockSession->expects($this->once())
+            ->method('inst_get')
+            ->with('oauth2.provider')
+            ->will($this->returnValue('ProviderName'));
 
         $mockMemberMapper = $this->getConstructorlessMock(
             'Bigfork\SilverStripeOAuth\Client\Mapper\GenericMemberMapper',
@@ -166,23 +145,25 @@ class ControllerExtensionTest extends LoginTestCase
             ->with($this->isInstanceOf('Member'), $mockResourceOwner)
             ->will($this->returnArgument(0));
 
-        $mockExtension = $this->getConstructorlessMock(
-            'Bigfork\SilverStripeOAuth\Client\Extension\ControllerExtension',
-            ['getMapper']
+        $mockHandler = $this->getConstructorlessMock(
+            'Bigfork\SilverStripeOAuth\Client\Handler\LoginTokenHandler',
+            ['getSession', 'getMapper']
         );
-        $mockExtension->expects($this->once())
+        $mockHandler->expects($this->at(0))
+            ->method('getSession')
+            ->will($this->returnValue($mockSession));
+        $mockHandler->expects($this->at(1))
             ->method('getMapper')
             ->with('ProviderName')
             ->will($this->returnValue($mockMemberMapper));
-        $mockExtension->setOwner(new Controller);
 
         $reflectionMethod = new ReflectionMethod(
-            'Bigfork\SilverStripeOAuth\Client\Extension\ControllerExtension',
+            'Bigfork\SilverStripeOAuth\Client\Handler\LoginTokenHandler',
             'createMember'
         );
         $reflectionMethod->setAccessible(true);
 
-        $member = $reflectionMethod->invoke($mockExtension, $mockToken);
+        $member = $reflectionMethod->invoke($mockHandler, $mockAccessToken, $mockProvider);
         $this->assertInstanceOf('Member', $member);
         $this->assertEquals('ProviderName', $member->OAuthSource);
     }
@@ -213,15 +194,14 @@ class ControllerExtensionTest extends LoginTestCase
 
         Injector::set_inst($mockInjector);
 
-        $extension = new ControllerExtension;
-        $extension->setOwner(new Controller);
+        $handler = new LoginTokenHandler;
         $reflectionMethod = new ReflectionMethod(
-            'Bigfork\SilverStripeOAuth\Client\Extension\ControllerExtension',
+            'Bigfork\SilverStripeOAuth\Client\Handler\LoginTokenHandler',
             'getMapper'
         );
         $reflectionMethod->setAccessible(true);
 
-        $this->assertEquals($mockMemberMapper, $reflectionMethod->invoke($extension, 'ProviderName'));
+        $this->assertEquals($mockMemberMapper, $reflectionMethod->invoke($handler, 'ProviderName'));
 
         // Restore things
         Injector::set_inst($injector);

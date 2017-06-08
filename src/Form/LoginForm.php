@@ -85,7 +85,7 @@ class LoginForm extends SilverStripeLoginForm
         $providers = Config::inst()->get($this->authenticator_class, 'providers');
         $config = $providers[$name];
         $scope = isset($config['scopes']) ? $config['scopes'] : ['email']; // We need at least an email address!
-        $url = Helper::buildAuthorisationUrl($name, $scope);
+        $url = Helper::buildAuthorisationUrl($name, 'login', $scope);
 
         return $this->getController()->redirect($url);
     }

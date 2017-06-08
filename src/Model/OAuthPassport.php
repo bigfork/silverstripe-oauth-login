@@ -13,7 +13,6 @@ class OAuthPassport extends DataObject
      * @var array
      */
     private static $has_one = [
-        'Member' => 'Member',
-        'Token' => 'OAuthAccessToken'
+        'Member' => 'Member'
     ];
 }

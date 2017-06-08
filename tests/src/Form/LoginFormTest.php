@@ -56,7 +56,7 @@ class LoginFormTest extends LoginTestCase
         Injector::inst()->registerService($controller, 'Bigfork\SilverStripeOAuth\Client\Control\Controller');
 
         $expectedUrl = Director::absoluteBaseURL() . 'loginformtest/authenticate/';
-        $expectedUrl .= '?provider=ProviderName&scope%5B0%5D=email';
+        $expectedUrl .= '?provider=ProviderName&context=login&scope%5B0%5D=email';
 
         $expectedResponse = new SS_HTTPResponse;
 

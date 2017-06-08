@@ -2,12 +2,8 @@
 
 SilverStripe OAuth2-based login functionality, based on the PHP League's [OAuth2 client](http://oauth2-client.thephpleague.com/) and the [SilverStripe OAuth module](https://github.com/bigfork/silverstripe-oauth).
 
-## \*\* IMPORTANT \*\*
-
-Please note that this module is still in early development and should **not** be used in a production environment. It has not been fully tested, and may undergo significant changes before a stable release.
-
 ### What this module does
-This module adds “Log in with &lt;provider&gt;” buttons to SilverStripe’s default login form, which will authenticate a user with the chosen provider and store an OAuth access token. It also provides configurable access token scopes (or permission levels) and field mapping for storing user data on registration.
+This module adds “Log in with &lt;provider&gt;” buttons to SilverStripe’s default login form, which will authenticate a user with the chosen provider. It also provides configurable access token scopes (or permission levels) and field mapping for storing user data on registration.
 
 ## Installation
 
@@ -61,10 +57,6 @@ The `Bigfork\SilverStripeOAuth\Client\Form\LoginForm` class also provides two ex
 ### Passports
 
 Each member that authenticates via an OAuth provider is assigned a “Passport” - a record which is unique to each OAuth account owner. This allows one SilverStripe account to be linked to multiple OAuth providers, or even linked to multiple individual accounts on the same provider. While both of those are possible, neither is the default behaviour for this module: by default, each new OAuth account will create a new SilverStripe member record. See the [multiple providers/accounts](#multiple-providers-accounts) and [email collisions](#email-collisions) sections for more information.
-
-### Stale tokens
-
-After successfully authenticating, this module will currently remove any old access tokens for the provider used for authentication, as they are regarded as stale (for the purposes of logging in at least). This behaviour is likely to change in future releases.
 
 ### Mappers
 
