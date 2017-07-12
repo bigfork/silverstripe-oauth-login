@@ -15,7 +15,7 @@
         "silverstripe/framework": "^3.3"
 	},
 	"require-dev": {
-		"phpunit/phpunit": "~3.7@stable"
+		"phpunit/phpunit": "~3.7"
 	},
 	"autoload": {
 		"psr-4": {"Bigfork\\SilverStripeOAuth\\Client\\": "src/"}
