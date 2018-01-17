@@ -2,35 +2,54 @@
 
 namespace Bigfork\SilverStripeOAuth\Client\Authenticator;
 
-use Bigfork\SilverStripeOAuth\Client\Form\LoginForm;
-use Config;
-use Controller;
-use Injector;
+use SilverStripe\Control\Controller;
+use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Injector\Injector;
+use SilverStripe\ORM\ValidationResult;
+use SilverStripe\Security\Authenticator as SilverStripeAuthenticator;
+use SilverStripe\Security\Member;
 
-class Authenticator extends \MemberAuthenticator
+class Authenticator implements SilverStripeAuthenticator
 {
     /**
      * @var array
+     * @config
      */
     private static $providers = [];
 
-    /**
-     * @return LoginForm|null
-     */
-    public static function get_login_form(Controller $controller)
+    public function supportedServices()
     {
-        if (!static::config()->providers) {
-            return null;
-        }
-
-        return Injector::inst()->create('Bigfork\SilverStripeOAuth\Client\Form\LoginForm', $controller, 'LoginForm');
+        return SilverStripeAuthenticator::LOGIN;
     }
 
-    /**
-     * @return string
-     */
-    public static function get_name()
+    public function getLoginHandler($link)
     {
-        return _t('Bigfork\SilverStripeOAuth\Client\Authenticator\Authenticator.TITLE', 'Social sign-on');
+        return LoginHandler::create($link, $this);
+    }
+
+    public function authenticate(array $data, HTTPRequest $request, ValidationResult &$result = null)
+    {
+        // No-op
+    }
+
+    public function checkPassword(Member $member, $password, ValidationResult &$result = null)
+    {
+        // No-op
+    }
+
+    public function getLogoutHandler($link)
+    {
+        // No-op
+    }
+
+    public function getLostPasswordHandler($link)
+    {
+        // No-op
+    }
+
+    public function getChangePasswordHandler($link)
+    {
+        // No-op
     }
 }

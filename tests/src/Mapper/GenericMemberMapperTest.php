@@ -4,9 +4,9 @@ namespace Bigfork\SilverStripeOAuth\Client\Test\Mapper;
 
 use Bigfork\SilverStripeOAuth\Client\Mapper\GenericMemberMapper;
 use Bigfork\SilverStripeOAuth\Client\Test\LoginTestCase;
-use Config;
-use Member;
 use ReflectionMethod;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Security\Member;
 
 class GenericMemberMapperTest extends LoginTestCase
 {

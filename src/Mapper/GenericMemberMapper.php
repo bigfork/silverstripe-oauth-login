@@ -2,9 +2,9 @@
 
 namespace Bigfork\SilverStripeOAuth\Client\Mapper;
 
-use Config;
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
-use Member;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Security\Member;
 
 class GenericMemberMapper implements MemberMapperInterface
 {
@@ -75,7 +75,7 @@ class GenericMemberMapper implements MemberMapperInterface
      */
     protected function getMapping()
     {
-        $mapping = Config::inst()->get(__CLASS__, 'mapping');
+        $mapping = Config::inst()->get(self::class, 'mapping');
         $provider = $this->getProvider();
         return (isset($mapping[$provider])) ? $mapping[$provider] : $mapping['default'];
     }

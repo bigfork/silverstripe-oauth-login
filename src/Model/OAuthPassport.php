@@ -1,6 +1,11 @@
 <?php
 
-class OAuthPassport extends DataObject
+namespace Bigfork\SilverStripeOAuth\Client\Model;
+
+use SilverStripe\ORM\DataObject;
+use SilverStripe\Security\Member;
+
+class Passport extends DataObject
 {
     /**
      * @var array
@@ -13,6 +18,8 @@ class OAuthPassport extends DataObject
      * @var array
      */
     private static $has_one = [
-        'Member' => 'Member'
+        'Member' => Member::class
     ];
+
+    private static $table_name = 'SS_OAuth_Passport';
 }

@@ -1,4 +1,4 @@
-Member:
+'SilverStripe\Security\Member':
   member1:
     FirstName: 'Tess'
     Surname: 'Tickles'

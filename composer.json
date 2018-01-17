@@ -1,26 +1,33 @@
 {
-	"name": "bigfork/silverstripe-oauth-login",
-	"type": "silverstripe-module",
-	"description": "SilverStripe logins via OAuth2, using the PHP League's OAuth2 client",
-	"keywords": ["silverstripe", "oauth", "oauth2", "login"],
-	"authors": [
-		{
-			"name": "Loz Calver",
-			"email": "lozcalver@bigfork.co.uk"
-		}
-	],
-	"license": "BSD-3-Clause",
-	"require": {
-		"bigfork/silverstripe-oauth": "^1",
-        "silverstripe/framework": "^3.3"
-	},
-	"require-dev": {
-		"phpunit/phpunit": "~3.7"
-	},
-	"autoload": {
-		"psr-4": {"Bigfork\\SilverStripeOAuth\\Client\\": "src/"}
-	},
-	"extra": {
-		"installer-name": "oauth-login"
-	}
+    "name": "bigfork/silverstripe-oauth-login",
+    "type": "silverstripe-vendormodule",
+    "description": "SilverStripe logins via OAuth2, using the PHP League's OAuth2 client",
+    "keywords": ["silverstripe", "oauth", "oauth2", "login"],
+    "authors": [
+        {
+            "name": "Loz Calver",
+            "email": "lozcalver@bigfork.co.uk"
+        }
+    ],
+    "license": "BSD-3-Clause",
+    "require": {
+        "bigfork/silverstripe-oauth": "^2",
+        "silverstripe/framework": "^4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "Bigfork\\SilverStripeOAuth\\Client\\": "src/",
+            "Bigfork\\SilverStripeOAuth\\Client\\Test\\": "tests/src/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "2.x-dev"
+        }
+    },
+    "prefer-stable": true,
+    "minimum-stability": "dev"
 }

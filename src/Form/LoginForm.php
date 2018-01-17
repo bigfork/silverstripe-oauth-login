@@ -4,52 +4,62 @@ namespace Bigfork\SilverStripeOAuth\Client\Form;
 
 use Bigfork\SilverStripeOAuth\Client\Authenticator\Authenticator;
 use Bigfork\SilverStripeOAuth\Client\Factory\ProviderFactory;
+use Bigfork\SilverStripeOAuth\Client\Form\LoginForm;
 use Bigfork\SilverStripeOAuth\Client\Helper\Helper;
-use Config;
-use Controller;
-use Director;
-use FieldList;
-use FormAction;
-use HiddenField;
-use Injector;
-use LoginForm as SilverStripeLoginForm;
-use Session;
+use SilverStripe\Control\Controller;
+use SilverStripe\Control\Director;
+use SilverStripe\Control\Session;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\FormAction;
+use SilverStripe\Forms\HiddenField;
+use SilverStripe\Security\LoginForm as SilverStripeLoginForm;
 
 class LoginForm extends SilverStripeLoginForm
 {
-    /**
-     * @var string
-     */
-    protected $authenticator_class = 'Bigfork\SilverStripeOAuth\Client\Authenticator\Authenticator';
+    public function __construct(
+        $controller,
+        $authenticatorClass,
+        $name,
+        $fields = null,
+        $actions = null
+    ) {
+        $this->setController($controller);
+        $this->authenticator_class = $authenticatorClass;
+        $this->setFormMethod('POST', true);
 
-    /**
-     * {@inheritdoc}
-     */
-    public function __construct($controller, $name)
-    {
-        parent::__construct($controller, $name, $this->getFields(), $this->getActions());
-        $this->setHTMLID('OAuthAuthenticator');
+        $fields = $fields ?: $this->getFormFields();
+        $actions = $actions ?: $this->getFormActions();
+
+        parent::__construct($controller, $name, $fields, $actions);
+
         $this->setTemplate('OAuthLoginForm');
     }
 
-    /**
-     * @return FieldList
-     */
-    public function getFields()
+    public function getFormFields()
     {
+        $request = $this->getRequest();
+        if ($request->getVar('BackURL')) {
+            $backURL = $request->getVar('BackURL');
+        } else {
+            $backURL = $request->getSession()->get('BackURL');
+        }
+
         $fields = FieldList::create(
             HiddenField::create('AuthenticationMethod', null, $this->authenticator_class, $this)
         );
 
-        $this->extend('updateFields', $fields);
+        if (isset($backURL)) {
+            $fields->push(HiddenField::create('BackURL', 'BackURL', $backURL));
+        }
+
+        $this->extend('updateFormFields', $fields);
 
         return $fields;
     }
 
-    /**
-     * @return FieldList
-     */
-    public function getActions()
+    public function getFormActions()
     {
         $actions = FieldList::create();
         $providers = Config::inst()->get($this->authenticator_class, 'providers');
@@ -57,7 +67,7 @@ class LoginForm extends SilverStripeLoginForm
         foreach ($providers as $provider => $config) {
             $name = isset($config['name']) ? $config['name'] : $provider;
             $text = _t(
-                'Bigfork\SilverStripeOAuth\Client\Form\LoginForm.BUTTON',
+                self::class . '.BUTTON',
                 'Sign in with {provider}',
                 ['provider' => $name]
             );
@@ -67,7 +77,7 @@ class LoginForm extends SilverStripeLoginForm
             $actions->push($action);
         }
 
-        $this->extend('updateActions', $actions);
+        $this->extend('updateFormActions', $actions);
 
         return $actions;
     }
@@ -122,5 +132,16 @@ class LoginForm extends SilverStripeLoginForm
         }
 
         return parent::__call($method, $args);
+    }
+
+    /**
+     * The name of this login form, to display in the frontend
+     * Replaces Authenticator::get_name()
+     *
+     * @return string
+     */
+    public function getAuthenticatorName()
+    {
+        return _t(Authenticator::class . '.TITLE', 'Social sign-on');
     }
 }

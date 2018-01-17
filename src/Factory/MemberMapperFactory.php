@@ -3,8 +3,9 @@
 namespace Bigfork\SilverStripeOAuth\Client\Factory;
 
 use Bigfork\SilverStripeOAuth\Client\Authenticator\Authenticator;
-use Config;
-use Injector;
+use Bigfork\SilverStripeOAuth\Client\Mapper\GenericMemberMapper;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Injector\Injector;
 
 class MemberMapperFactory
 {
@@ -19,12 +20,12 @@ class MemberMapperFactory
      */
     public function createMapper($name)
     {
-        $mappers = Config::inst()->get(__CLASS__, 'mappers');
+        $mappers = Config::inst()->get(self::class, 'mappers');
 
         if (isset($mappers[$name])) {
             return Injector::inst()->get($mappers[$name]);
         }
 
-        return Injector::inst()->createWithArgs('Bigfork\SilverStripeOAuth\Client\Mapper\GenericMemberMapper', [$name]);
+        return Injector::inst()->createWithArgs(GenericMemberMapper::class, [$name]);
     }
 }

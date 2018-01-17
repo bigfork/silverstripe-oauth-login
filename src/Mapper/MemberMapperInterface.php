@@ -3,7 +3,7 @@
 namespace Bigfork\SilverStripeOAuth\Client\Mapper;
 
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
-use Member;
+use SilverStripe\Security\Member;
 
 interface MemberMapperInterface
 {

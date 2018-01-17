@@ -2,15 +2,16 @@
 
 namespace Bigfork\SilverStripeOAuth\Client\Handler;
 
-use Controller;
-use Injector;
+use Bigfork\SilverStripeOAuth\Client\Factory\MemberMapperFactory;
+use Bigfork\SilverStripeOAuth\Client\Model\Passport;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Token\AccessToken;
-use Member;
-use OAuthPassport;
-use Security;
-use Session;
-use SS_HTTPResponse;
+use SilverStripe\Control\Controller;
+use SilverStripe\Control\Session;
+use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Security\IdentityStore;
+use SilverStripe\Security\Member;
+use SilverStripe\Security\Security;
 
 class LoginTokenHandler implements TokenHandler
 {
@@ -27,13 +28,14 @@ class LoginTokenHandler implements TokenHandler
         }
 
         // Check whether the member can log in before we proceed
-        $result = $member->canLogIn();
-        if (!$result->valid()) {
-            return Security::permissionFailure(null, $result->message());
+        $result = $member->validateCanLogin();
+        if (!$result->isValid()) {
+            return Security::permissionFailure(null, implode('; ', $result->getMessages()));
         }
 
         // Log the member in
-        $member->logIn();
+        $identityStore = Injector::inst()->get(IdentityStore::class);
+        $identityStore->logIn($member);
     }
 
     /**
@@ -47,7 +49,7 @@ class LoginTokenHandler implements TokenHandler
     {
         $user = $provider->getResourceOwner($token);
 
-        $passport = OAuthPassport::get()->filter([
+        $passport = Passport::get()->filter([
             'Identifier' => $user->getId()
         ])->first();
 
@@ -56,7 +58,7 @@ class LoginTokenHandler implements TokenHandler
             $member = $this->createMember($token, $provider);
 
             // Create a passport for the new member
-            $passport = OAuthPassport::create()->update([
+            $passport = Passport::create()->update([
                 'Identifier' => $user->getId(),
                 'MemberID' => $member->ID
             ]);
@@ -76,7 +78,7 @@ class LoginTokenHandler implements TokenHandler
     protected function createMember(AccessToken $token, AbstractProvider $provider)
     {
         $session = $this->getSession();
-        $providerName = $session->inst_get('oauth2.provider');
+        $providerName = $session->get('oauth2.provider');
         $user = $provider->getResourceOwner($token);
 
         $member = Member::create();
@@ -93,7 +95,7 @@ class LoginTokenHandler implements TokenHandler
      */
     protected function getMapper($providerName)
     {
-        return Injector::inst()->get('MemberMapperFactory')->createMapper($providerName);
+        return Injector::inst()->get(MemberMapperFactory::class)->createMapper($providerName);
     }
 
     /**
@@ -102,9 +104,9 @@ class LoginTokenHandler implements TokenHandler
     protected function getSession()
     {
         if (Controller::has_curr()) {
-            return Controller::curr()->getSession();
+            return Controller::curr()->getRequest()->getSession();
         }
 
-        return Injector::inst()->create('Session', isset($_SESSION) ? $_SESSION : []);
+        return Injector::inst()->create(Session::class, isset($_SESSION) ? $_SESSION : []);
     }
 }
