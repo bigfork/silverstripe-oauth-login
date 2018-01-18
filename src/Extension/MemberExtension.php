@@ -2,6 +2,7 @@
 
 namespace Bigfork\SilverStripeOAuth\Client\Extension;
 
+use Bigfork\SilverStripeOAuth\Client\Model\Passport;
 use SilverStripe\Core\Extension as SilverStripeExtension;
 
 class MemberExtension extends SilverStripeExtension
