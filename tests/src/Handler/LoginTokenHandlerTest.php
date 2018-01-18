@@ -60,9 +60,9 @@ class LoginTokenHandlerTest extends LoginTestCase
             ->method('isValid')
             ->will($this->returnValue(false));
 
-        $mockMember = $this->getMock(Member::class, ['canLogIn', 'logIn']);
+        $mockMember = $this->getMock(Member::class, ['validateCanLogin']);
         $mockMember->expects($this->once())
-            ->method('canLogIn')
+            ->method('validateCanLogin')
             ->will($this->returnValue($mockValidationResult));
 
         $mockHandler = $this->getMock(
@@ -99,7 +99,7 @@ class LoginTokenHandlerTest extends LoginTestCase
             ->with($mockAccessToken)
             ->will($this->returnValue($mockResourceOwner));
 
-        $member = $this->objFromFixture('Member', 'member1');
+        $member = $this->objFromFixture(Member::class, 'member1');
 
         $mockHandler = $this->getMock(
             LoginTokenHandler::class,
