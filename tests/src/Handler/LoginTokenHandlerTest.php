@@ -15,7 +15,9 @@ use SilverStripe\Control\Session;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Core\Injector\InjectorLoader;
 use SilverStripe\ORM\ValidationResult;
+use SilverStripe\Security\IdentityStore;
 use SilverStripe\Security\Member;
+use SilverStripe\Security\MemberAuthenticator\SessionAuthenticationHandler;
 
 class LoginTokenHandlerTest extends LoginTestCase
 {
@@ -31,12 +33,17 @@ class LoginTokenHandlerTest extends LoginTestCase
             ->method('isValid')
             ->will($this->returnValue(true));
 
-        $mockMember = $this->getMock(Member::class, ['validateCanLogin', 'logIn']);
-        $mockMember->expects($this->at(0))
+        $mockMember = $this->getMock(Member::class, ['validateCanLogin']);
+        $mockMember->expects($this->once())
             ->method('validateCanLogin')
             ->will($this->returnValue($mockValidationResult));
-        $mockMember->expects($this->at(1))
-            ->method('logIn');
+
+        $mockIdentityStore = $this->getMock(SessionAuthenticationHandler::class, ['logIn']);
+        $mockIdentityStore->expects($this->once())
+            ->method('logIn')
+            ->with($mockMember);
+
+        Injector::inst()->registerService($mockIdentityStore, IdentityStore::class);
 
         $mockHandler = $this->getMock(
             LoginTokenHandler::class,
