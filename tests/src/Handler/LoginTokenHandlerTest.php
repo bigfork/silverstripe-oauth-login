@@ -28,27 +28,32 @@ class LoginTokenHandlerTest extends LoginTestCase
         $mockAccessToken = $this->getConstructorlessMock(AccessToken::class);
         $mockProvider = $this->getConstructorlessMock(GenericProvider::class);
 
-        $mockValidationResult = $this->getMock(ValidationResult::class, ['isValid']);
+        $mockValidationResult = $this->getMockBuilder(ValidationResult::class)
+            ->setMethods(['isValid'])
+            ->getMock();
         $mockValidationResult->expects($this->once())
             ->method('isValid')
             ->will($this->returnValue(true));
 
-        $mockMember = $this->getMock(Member::class, ['validateCanLogin']);
+        $mockMember = $this->getMockBuilder(Member::class)
+            ->setMethods(['validateCanLogin'])
+            ->getMock();
         $mockMember->expects($this->once())
             ->method('validateCanLogin')
             ->will($this->returnValue($mockValidationResult));
 
-        $mockIdentityStore = $this->getMock(SessionAuthenticationHandler::class, ['logIn']);
+        $mockIdentityStore = $this->getMockBuilder(SessionAuthenticationHandler::class)
+            ->setMethods(['logIn'])
+            ->getMock();
         $mockIdentityStore->expects($this->once())
             ->method('logIn')
             ->with($mockMember);
 
         Injector::inst()->registerService($mockIdentityStore, IdentityStore::class);
 
-        $mockHandler = $this->getMock(
-            LoginTokenHandler::class,
-            ['findOrCreateMember']
-        );
+        $mockHandler = $this->getMockBuilder(LoginTokenHandler::class)
+            ->setMethods(['findOrCreateMember'])
+            ->getMock();
         $mockHandler->expects($this->once())
             ->method('findOrCreateMember')
             ->with($mockAccessToken, $mockProvider)
@@ -62,20 +67,23 @@ class LoginTokenHandlerTest extends LoginTestCase
         $mockAccessToken = $this->getConstructorlessMock(AccessToken::class);
         $mockProvider = $this->getConstructorlessMock(GenericProvider::class);
 
-        $mockValidationResult = $this->getMock(ValidationResult::class, ['isValid']);
+        $mockValidationResult = $this->getMockBuilder(ValidationResult::class)
+            ->setMethods(['isValid'])
+            ->getMock();
         $mockValidationResult->expects($this->once())
             ->method('isValid')
             ->will($this->returnValue(false));
 
-        $mockMember = $this->getMock(Member::class, ['validateCanLogin']);
+        $mockMember = $this->getMockBuilder(Member::class)
+            ->setMethods(['validateCanLogin'])
+            ->getMock();
         $mockMember->expects($this->once())
             ->method('validateCanLogin')
             ->will($this->returnValue($mockValidationResult));
 
-        $mockHandler = $this->getMock(
-            LoginTokenHandler::class,
-            ['findOrCreateMember']
-        );
+        $mockHandler = $this->getMockBuilder(LoginTokenHandler::class)
+            ->setMethods(['findOrCreateMember'])
+            ->getMock();
         $mockHandler->expects($this->once())
             ->method('findOrCreateMember')
             ->with($mockAccessToken, $mockProvider)
@@ -89,18 +97,12 @@ class LoginTokenHandlerTest extends LoginTestCase
     {
         $mockAccessToken = $this->getConstructorlessMock(AccessToken::class);
 
-        $mockResourceOwner = $this->getConstructorlessMock(
-            GenericResourceOwner::class,
-            ['getId']
-        );
+        $mockResourceOwner = $this->getConstructorlessMock(GenericResourceOwner::class, ['getId']);
         $mockResourceOwner->expects($this->exactly(2))
             ->method('getId')
             ->will($this->returnValue(123456789));
 
-        $mockProvider = $this->getConstructorlessMock(
-            GenericProvider::class,
-            ['getResourceOwner']
-        );
+        $mockProvider = $this->getConstructorlessMock(GenericProvider::class, ['getResourceOwner']);
         $mockProvider->expects($this->once())
             ->method('getResourceOwner')
             ->with($mockAccessToken)
@@ -108,19 +110,15 @@ class LoginTokenHandlerTest extends LoginTestCase
 
         $member = $this->objFromFixture(Member::class, 'member1');
 
-        $mockHandler = $this->getMock(
-            LoginTokenHandler::class,
-            ['createMember']
-        );
+        $mockHandler = $this->getMockBuilder(LoginTokenHandler::class)
+            ->setMethods(['createMember'])
+            ->getMock();
         $mockHandler->expects($this->once())
             ->method('createMember')
             ->with($mockAccessToken, $mockProvider)
             ->will($this->returnValue($member));
 
-        $reflectionMethod = new ReflectionMethod(
-            LoginTokenHandler::class,
-            'findOrCreateMember'
-        );
+        $reflectionMethod = new ReflectionMethod(LoginTokenHandler::class, 'findOrCreateMember');
         $reflectionMethod->setAccessible(true);
 
         $this->assertEquals($member, $reflectionMethod->invoke($mockHandler, $mockAccessToken, $mockProvider));
@@ -135,10 +133,7 @@ class LoginTokenHandlerTest extends LoginTestCase
         $mockAccessToken = $this->getConstructorlessMock(AccessToken::class);
         $mockResourceOwner = $this->getConstructorlessMock(GenericResourceOwner::class);
 
-        $mockProvider = $this->getConstructorlessMock(
-            GenericProvider::class,
-            ['getResourceOwner']
-        );
+        $mockProvider = $this->getConstructorlessMock(GenericProvider::class, ['getResourceOwner']);
         $mockProvider->expects($this->once())
             ->method('getResourceOwner')
             ->with($mockAccessToken)
@@ -150,19 +145,13 @@ class LoginTokenHandlerTest extends LoginTestCase
             ->with('oauth2.provider')
             ->will($this->returnValue('ProviderName'));
 
-        $mockMemberMapper = $this->getConstructorlessMock(
-            GenericMemberMapper::class,
-            ['map']
-        );
+        $mockMemberMapper = $this->getConstructorlessMock(GenericMemberMapper::class, ['map']);
         $mockMemberMapper->expects($this->once())
             ->method('map')
             ->with($this->isInstanceOf(Member::class), $mockResourceOwner)
             ->will($this->returnArgument(0));
 
-        $mockHandler = $this->getConstructorlessMock(
-            LoginTokenHandler::class,
-            ['getSession', 'getMapper']
-        );
+        $mockHandler = $this->getConstructorlessMock(LoginTokenHandler::class, ['getSession', 'getMapper']);
         $mockHandler->expects($this->at(0))
             ->method('getSession')
             ->will($this->returnValue($mockSession));
@@ -171,10 +160,7 @@ class LoginTokenHandlerTest extends LoginTestCase
             ->with('ProviderName')
             ->will($this->returnValue($mockMemberMapper));
 
-        $reflectionMethod = new ReflectionMethod(
-            LoginTokenHandler::class,
-            'createMember'
-        );
+        $reflectionMethod = new ReflectionMethod(LoginTokenHandler::class, 'createMember');
         $reflectionMethod->setAccessible(true);
 
         $member = $reflectionMethod->invoke($mockHandler, $mockAccessToken, $mockProvider);
@@ -184,23 +170,19 @@ class LoginTokenHandlerTest extends LoginTestCase
 
     public function testGetMapper()
     {
-        // Store original
-        $injector = Injector::inst();
+        $mockMemberMapper = $this->getConstructorlessMock(GenericMemberMapper::class);
 
-        $mockMemberMapper = $this->getConstructorlessMock(
-            GenericMemberMapper::class
-        );
-
-        $mockMapperFactory = $this->getMock(
-            MemberMapperFactory::class,
-            ['createMapper']
-        );
+        $mockMapperFactory = $this->getMockBuilder(MemberMapperFactory::class)
+            ->setMethods(['createMapper'])
+            ->getMock();
         $mockMapperFactory->expects($this->once())
             ->method('createMapper')
             ->with('ProviderName')
             ->will($this->returnValue($mockMemberMapper));
 
-        $mockInjector = $this->getMock(Injector::class, ['get']);
+        $mockInjector = $this->getMockBuilder(Injector::class)
+            ->setMethods(['get'])
+            ->getMock();
         $mockInjector->expects($this->once())
             ->method('get')
             ->with(MemberMapperFactory::class)
@@ -210,10 +192,7 @@ class LoginTokenHandlerTest extends LoginTestCase
         InjectorLoader::inst()->pushManifest($mockInjector);
 
         $handler = new LoginTokenHandler;
-        $reflectionMethod = new ReflectionMethod(
-            LoginTokenHandler::class,
-            'getMapper'
-        );
+        $reflectionMethod = new ReflectionMethod(LoginTokenHandler::class, 'getMapper');
         $reflectionMethod->setAccessible(true);
 
         $this->assertEquals($mockMemberMapper, $reflectionMethod->invoke($handler, 'ProviderName'));

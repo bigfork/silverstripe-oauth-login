@@ -28,8 +28,7 @@ class LoginFormTest extends LoginTestCase
             ]
         ];
 
-        Config::inst()->remove('Bigfork\SilverStripeOAuth\Client\Authenticator\Authenticator', 'providers');
-        Config::inst()->update('Bigfork\SilverStripeOAuth\Client\Authenticator\Authenticator', 'providers', $providers);
+        Config::modify()->set(Authenticator::class, 'providers', $providers);
 
         $form = new LoginForm(new Controller, Authenticator::class, 'FormName');
         $actions = $form->getFormActions();
@@ -53,8 +52,7 @@ class LoginFormTest extends LoginTestCase
             'ProviderName' => []
         ];
 
-        Config::modify()->remove(Authenticator::class, 'providers');
-        Config::modify()->update(Authenticator::class, 'providers', $providers);
+        Config::modify()->set(Authenticator::class, 'providers', $providers);
 
         $controller = new LoginFormTest_Controller;
         Injector::inst()->registerService($controller, OAuthController::class);
@@ -64,16 +62,15 @@ class LoginFormTest extends LoginTestCase
 
         $expectedResponse = new HTTPResponse;
 
-        $mockController = $this->getMock(Controller::class, ['redirect']);
+        $mockController = $this->getMockBuilder(Controller::class)
+            ->setMethods(['redirect'])
+            ->getMock();
         $mockController->expects($this->once())
             ->method('redirect')
             ->with($expectedUrl)
             ->will($this->returnValue($expectedResponse));
 
-        $mockLoginForm = $this->getConstructorlessMock(
-            LoginForm::class,
-            ['getController']
-        );
+        $mockLoginForm = $this->getConstructorlessMock(LoginForm::class, ['getController']);
         $mockLoginForm->expects($this->once())
             ->method('getController')
             ->will($this->returnValue($mockController));
@@ -88,8 +85,7 @@ class LoginFormTest extends LoginTestCase
             'ProviderName' => []
         ];
 
-        Config::modify()->remove(Authenticator::class, 'providers');
-        Config::modify()->update(Authenticator::class, 'providers', $providers);
+        Config::modify()->set(Authenticator::class, 'providers', $providers);
 
         $expectedResponse = new HTTPResponse;
 

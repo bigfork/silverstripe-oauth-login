@@ -17,26 +17,22 @@ class MemberMapperFactoryTest extends LoginTestCase
     public function testCreateMapper()
     {
         Config::modify()->update(
-            'Bigfork\SilverStripeOAuth\Client\Factory\MemberMapperFactory',
+            MemberMapperFactory::class,
             'mappers',
-            ['TestProvider' => 'Bigfork\SilverStripeOAuth\Client\Test\Factory\MemberMapperFactoryTest_Mapper']
+            ['TestProvider' => MemberMapperFactoryTest_Mapper::class]
         );
 
         $factory = new MemberMapperFactory();
-        $this->assertInstanceOf(
-            'Bigfork\SilverStripeOAuth\Client\Test\Factory\MemberMapperFactoryTest_Mapper',
-            $factory->createMapper('TestProvider')
-        );
-
-        // Store original
-        $injector = Injector::inst();
+        $this->assertInstanceOf(MemberMapperFactoryTest_Mapper::class, $factory->createMapper('TestProvider'));
 
         $genericMapper = new GenericMemberMapper('test');
 
-        $mockInjector = $this->getMock(Injector::class, ['createWithArgs']);
+        $mockInjector = $this->getMockBuilder(Injector::class)
+            ->setMethods(['createWithArgs'])
+            ->getMock();
         $mockInjector->expects($this->once())
             ->method('createWithArgs')
-            ->with('Bigfork\SilverStripeOAuth\Client\Mapper\GenericMemberMapper', ['AnotherTestProvider'])
+            ->with(GenericMemberMapper::class, ['AnotherTestProvider'])
             ->will($this->returnValue($genericMapper));
 
         // Inject mock

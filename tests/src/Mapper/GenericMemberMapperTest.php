@@ -4,6 +4,7 @@ namespace Bigfork\SilverStripeOAuth\Client\Test\Mapper;
 
 use Bigfork\SilverStripeOAuth\Client\Mapper\GenericMemberMapper;
 use Bigfork\SilverStripeOAuth\Client\Test\LoginTestCase;
+use League\OAuth2\Client\Provider\GenericResourceOwner;
 use ReflectionMethod;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Security\Member;
@@ -33,13 +34,9 @@ class GenericMemberMapperTest extends LoginTestCase
             ]
         ];
 
-        Config::inst()->remove('Bigfork\SilverStripeOAuth\Client\Mapper\GenericMemberMapper', 'mapping');
-        Config::inst()->update('Bigfork\SilverStripeOAuth\Client\Mapper\GenericMemberMapper', 'mapping', $mapping);
+        Config::modify()->set(GenericMemberMapper::class, 'mapping', $mapping);
 
-        $reflectionMethod = new ReflectionMethod(
-            'Bigfork\SilverStripeOAuth\Client\Mapper\GenericMemberMapper',
-            'getMapping'
-        );
+        $reflectionMethod = new ReflectionMethod(GenericMemberMapper::class, 'getMapping');
         $reflectionMethod->setAccessible(true);
 
         $mapper = new GenericMemberMapper('ProviderName');
@@ -60,7 +57,7 @@ class GenericMemberMapperTest extends LoginTestCase
         $member = new Member;
 
         $mockResourceOwner = $this->getConstructorlessMock(
-            'League\OAuth2\Client\Provider\GenericResourceOwner',
+            GenericResourceOwner::class,
             ['toArray', 'getLastName', 'getEmail']
         );
         $mockResourceOwner->expects($this->at(0))
@@ -73,10 +70,7 @@ class GenericMemberMapperTest extends LoginTestCase
             ->method('getEmail')
             ->will($this->returnValue('foo.bar@example.com'));
 
-        $mockMapper = $this->getConstructorlessMock(
-            'Bigfork\SilverStripeOAuth\Client\Mapper\GenericMemberMapper',
-            ['getMapping']
-        );
+        $mockMapper = $this->getConstructorlessMock(GenericMemberMapper::class, ['getMapping']);
         $mockMapper->expects($this->once())
             ->method('getMapping')
             ->will($this->returnValue($mapping));

@@ -4,9 +4,6 @@ Bigfork\SilverStripeOAuth\Client\Control\Controller:
       priority: 1
       context: login
       class: Bigfork\SilverStripeOAuth\Client\Handler\LoginTokenHandler
-SilverStripe\Core\Injector\Injector:
-  MemberMapperFactory:
-    class: Bigfork\SilverStripeOAuth\Client\Factory\MemberMapperFactory
 SilverStripe\Security\Member:
   extensions:
     - Bigfork\SilverStripeOAuth\Client\Extension\MemberExtension

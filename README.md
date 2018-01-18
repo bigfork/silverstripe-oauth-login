@@ -18,8 +18,8 @@ To show a login button for a configured provider, you must add them to the new `
 Following on from the Facebook example in the [SilverStripe OAuth2 module documentation](https://github.com/bigfork/silverstripe-oauth#configuration):
 
 ```yml
-Injector:
-  ProviderFactory:
+SilverStripe\Core\Injector\Injector:
+  Bigfork\SilverStripeOAuth\Client\Factory\ProviderFactory:
     properties:
       providers:
         'Facebook': '%$FacebookProvider'

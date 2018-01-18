@@ -9,17 +9,21 @@ class MemberExtensionTest extends LoginTestCase
 {
     public function testOnBeforeDelete()
     {
-        $mockDataList = $this->getMock('stdClass', ['removeAll']);
+        $mockDataList = $this->getMockBuilder('stdClass')
+            ->setMethods(['removeAll'])
+            ->getMock();
         $mockDataList->expects($this->once())
             ->method('removeAll');
 
-        $mockMember = $this->getMock('stdClass', ['Passports']);
+        $mockMember = $this->getMockBuilder('stdClass')
+            ->setMethods(['Passports'])
+            ->getMock();
         $mockMember->expects($this->once())
             ->method('Passports')
             ->will($this->returnValue($mockDataList));
 
         $extension = new MemberExtension;
-        $extension->setOwner($mockMember, 'Member');
+        $extension->setOwner($mockMember);
         $extension->onBeforeDelete();
     }
 }
