@@ -31,9 +31,9 @@ class LoginTokenHandlerTest extends LoginTestCase
             ->method('isValid')
             ->will($this->returnValue(true));
 
-        $mockMember = $this->getMock(Member::class, ['canLogIn', 'logIn']);
+        $mockMember = $this->getMock(Member::class, ['validateCanLogin', 'logIn']);
         $mockMember->expects($this->at(0))
-            ->method('canLogIn')
+            ->method('validateCanLogin')
             ->will($this->returnValue($mockValidationResult));
         $mockMember->expects($this->at(1))
             ->method('logIn');
