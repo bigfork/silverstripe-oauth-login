@@ -19,7 +19,7 @@ use SilverStripe\Security\Member;
 
 class LoginTokenHandlerTest extends LoginTestCase
 {
-    /* protected static $fixture_file = 'LoginTokenHandlerTest.yml'; */
+    protected static $fixture_file = 'LoginTokenHandlerTest.yml';
 
     public function testHandleToken()
     {
@@ -78,7 +78,7 @@ class LoginTokenHandlerTest extends LoginTestCase
         $this->assertEquals(403, $response->getStatusCode());
     }
 
-    /*public function testFindOrCreateMember()
+    public function testFindOrCreateMember()
     {
         $mockAccessToken = $this->getConstructorlessMock(AccessToken::class);
 
@@ -121,7 +121,7 @@ class LoginTokenHandlerTest extends LoginTestCase
         $passport = $member->Passports()->first();
         $this->assertNotNull($passport);
         $this->assertEquals(123456789, $passport->Identifier);
-    }*/
+    }
 
     public function testCreateMember()
     {
