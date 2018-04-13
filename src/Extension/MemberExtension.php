@@ -26,6 +26,8 @@ class MemberExtension extends SilverStripeExtension
      */
     public function onBeforeDelete()
     {
-        $this->owner->Passports()->removeAll();
+        foreach ($this->owner->Passports() as $passport) {
+            $passport->delete();
+        }
     }
 }
