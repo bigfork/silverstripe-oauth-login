@@ -2,8 +2,6 @@
 
 namespace Bigfork\SilverStripeOAuth\Client\Form;
 
-use Bigfork\SilverStripeOAuth\Client\Authenticator\Authenticator;
-use Bigfork\SilverStripeOAuth\Client\Factory\ProviderFactory;
 use Bigfork\SilverStripeOAuth\Client\Helper\Helper;
 use Config;
 use Controller;
@@ -11,9 +9,11 @@ use Director;
 use FieldList;
 use FormAction;
 use HiddenField;
-use Injector;
+use HTTP;
 use LoginForm as SilverStripeLoginForm;
+use Security;
 use Session;
+use SS_HTTPResponse;
 
 class LoginForm extends SilverStripeLoginForm
 {
@@ -37,9 +37,18 @@ class LoginForm extends SilverStripeLoginForm
      */
     public function getFields()
     {
+        $backURL = Session::get('BackURL');
+        if (isset($_REQUEST['BackURL'])) {
+            $backURL = $_REQUEST['BackURL'];
+        }
+
         $fields = FieldList::create(
             HiddenField::create('AuthenticationMethod', null, $this->authenticator_class, $this)
         );
+
+        if ($backURL) {
+            $fields->push(HiddenField::create('BackURL', 'BackURL', $backURL));
+        }
 
         $this->extend('updateFields', $fields);
 
@@ -85,9 +94,22 @@ class LoginForm extends SilverStripeLoginForm
         $providers = Config::inst()->get($this->authenticator_class, 'providers');
         $config = $providers[$name];
         $scope = isset($config['scopes']) ? $config['scopes'] : ['email']; // We need at least an email address!
-        $url = Helper::buildAuthorisationUrl($name, 'login', $scope);
+        $authUrl = Helper::buildAuthorisationUrl($name, 'login', $scope);
 
-        return $this->getController()->redirect($url);
+        // Preserve BackURL parameter if present
+        if (isset($_REQUEST['BackURL']) && Director::is_site_url($_REQUEST['BackURL'])) {
+            $backURL = Director::absoluteURL($_REQUEST['BackURL']);
+        } else if ($url = Security::config()->default_login_dest) {
+            // Inherit Security.default_login_dest behaviour from MemberLoginForm
+            $backURL = Controller::join_links(Director::absoluteBaseURL(), $url);
+        }
+
+        // Add the BackURL parameter to the authentication endpoint URL
+        if (isset($backURL)) {
+            $authUrl = HTTP::setGetVar('BackURL', Director::absoluteURL($backURL), $authUrl, '&');
+        }
+
+        return $this->getController()->redirect($authUrl);
     }
 
     /**
