@@ -2,8 +2,6 @@
 
 namespace Bigfork\SilverStripeOAuth\Client\Extension;
 
-use FieldList;
-
 class MemberExtension extends \Extension
 {
     /**
