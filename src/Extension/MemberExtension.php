@@ -25,6 +25,8 @@ class MemberExtension extends \Extension
      */
     public function onBeforeDelete()
     {
-        $this->owner->Passports()->removeAll();
+        foreach ($this->owner->Passports() as $passport) {
+            $passport->delete();
+        }
     }
 }
