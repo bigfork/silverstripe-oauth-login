@@ -2,13 +2,16 @@
 
 namespace Bigfork\SilverStripeOAuth\Client\Handler;
 
+use Bigfork\SilverStripeOAuth\Client\Extension\MemberExtension;
 use Bigfork\SilverStripeOAuth\Client\Factory\MemberMapperFactory;
+use Bigfork\SilverStripeOAuth\Client\Mapper\MemberMapperInterface;
 use Bigfork\SilverStripeOAuth\Client\Model\Passport;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Token\AccessToken;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Session;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\ORM\ValidationException;
 use SilverStripe\Security\IdentityStore;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
@@ -36,6 +39,7 @@ class LoginTokenHandler implements TokenHandler
         // Log the member in
         $identityStore = Injector::inst()->get(IdentityStore::class);
         $identityStore->logIn($member);
+        return null;
     }
 
     /**
@@ -44,11 +48,13 @@ class LoginTokenHandler implements TokenHandler
      * @param AccessToken $token
      * @param AbstractProvider $provider
      * @return Member
+     * @throws ValidationException
      */
     protected function findOrCreateMember(AccessToken $token, AbstractProvider $provider)
     {
         $user = $provider->getResourceOwner($token);
 
+        /** @var Passport $passport */
         $passport = Passport::get()->filter([
             'Identifier' => $user->getId()
         ])->first();
@@ -74,6 +80,7 @@ class LoginTokenHandler implements TokenHandler
      * @param AccessToken $token
      * @param AbstractProvider $provider
      * @return Member
+     * @throws ValidationException
      */
     protected function createMember(AccessToken $token, AbstractProvider $provider)
     {
@@ -81,6 +88,7 @@ class LoginTokenHandler implements TokenHandler
         $providerName = $session->get('oauth2.provider');
         $user = $provider->getResourceOwner($token);
 
+        /** @var Member|MemberExtension $member */
         $member = Member::create();
         $member = $this->getMapper($providerName)->map($member, $user);
         $member->OAuthSource = $providerName;
@@ -91,7 +99,7 @@ class LoginTokenHandler implements TokenHandler
 
     /**
      * @param string $providerName
-     * @return Bigfork\SilverStripeOAuth\Client\Mapper\MemberMapperInterface
+     * @return MemberMapperInterface
      */
     protected function getMapper($providerName)
     {
