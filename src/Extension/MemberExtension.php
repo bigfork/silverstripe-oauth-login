@@ -4,10 +4,16 @@ namespace Bigfork\SilverStripeOAuth\Client\Extension;
 
 use Bigfork\SilverStripeOAuth\Client\Model\Passport;
 use SilverStripe\Core\Extension as SilverStripeExtension;
+use SilverStripe\ORM\HasManyList;
 
+/**
+ * @property string $OAuthSource
+ * @property HasManyList|Passport[] Passports()
+ */
 class MemberExtension extends SilverStripeExtension
 {
     /**
+     * @config
      * @var array
      */
     private static $db = [
@@ -15,6 +21,7 @@ class MemberExtension extends SilverStripeExtension
     ];
 
     /**
+     * @config
      * @var array
      */
     private static $has_many = [
@@ -22,12 +29,12 @@ class MemberExtension extends SilverStripeExtension
     ];
 
     /**
-     * Remove this member's OAuth passports on delete
+     * Cleanup passports on user deletion
+     *
+     * @config
+     * @var array
      */
-    public function onBeforeDelete()
-    {
-        foreach ($this->owner->Passports() as $passport) {
-            $passport->delete();
-        }
-    }
+    private static $cascade_deletes = [
+        'Passports',
+    ];
 }

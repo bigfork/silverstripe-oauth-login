@@ -5,6 +5,10 @@ namespace Bigfork\SilverStripeOAuth\Client\Model;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
 
+/**
+ * @property string $Identifier
+ * @method Member Member()
+ */
 class Passport extends DataObject
 {
     /**

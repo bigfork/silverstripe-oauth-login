@@ -3,8 +3,8 @@
 namespace Bigfork\SilverStripeOAuth\Client\Authenticator;
 
 use Bigfork\SilverStripeOAuth\Client\Form\LoginForm;
+use SilverStripe\Control\Controller;
 use SilverStripe\Control\RequestHandler;
-use SilverStripe\Core\Config\Config;
 
 class LoginHandler extends RequestHandler
 {

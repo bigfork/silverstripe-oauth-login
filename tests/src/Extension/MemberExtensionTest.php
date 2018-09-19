@@ -2,34 +2,27 @@
 
 namespace Bigfork\SilverStripeOAuth\Client\Test\Extension;
 
-use ArrayIterator;
 use Bigfork\SilverStripeOAuth\Client\Extension\MemberExtension;
 use Bigfork\SilverStripeOAuth\Client\Model\Passport;
 use Bigfork\SilverStripeOAuth\Client\Test\LoginTestCase;
-use SilverStripe\ORM\DataList;
+use SilverStripe\Security\Member;
 
 class MemberExtensionTest extends LoginTestCase
 {
+    protected $usesDatabase = true;
+
     public function testOnBeforeDelete()
     {
-        $mockPassport = $this->getMock(Passport::class, ['delete']);
-        $mockPassport->expects($this->once())
-            ->method('delete');
+        /** @var Member|MemberExtension $member */
+        $member = new Member();
+        $member->Email = 'memberextension@test.com';
+        $member->write();
+        $passport = new Passport();
+        $passport->write();
+        $member->Passports()->add($passport);
+        $id = $passport->ID;
+        $member->delete();
+        $this->assertNull(Passport::get()->byID($id));
 
-        $mockDataList = $this->getConstructorlessMock(DataList::class, ['getIterator']);
-        $mockDataList->expects($this->once())
-            ->method('getIterator')
-            ->will($this->returnValue(new ArrayIterator([$mockPassport])));
-
-        $mockMember = $this->getMockBuilder('stdClass')
-            ->setMethods(['Passports'])
-            ->getMock();
-        $mockMember->expects($this->once())
-            ->method('Passports')
-            ->will($this->returnValue($mockDataList));
-
-        $extension = new MemberExtension;
-        $extension->setOwner($mockMember);
-        $extension->onBeforeDelete();
     }
 }

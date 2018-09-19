@@ -2,8 +2,8 @@
 
 namespace Bigfork\SilverStripeOAuth\Client\Factory;
 
-use Bigfork\SilverStripeOAuth\Client\Authenticator\Authenticator;
 use Bigfork\SilverStripeOAuth\Client\Mapper\GenericMemberMapper;
+use Bigfork\SilverStripeOAuth\Client\Mapper\MemberMapperInterface;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
 
@@ -16,7 +16,7 @@ class MemberMapperFactory
 
     /**
      * @param string $name
-     * @return Bigfork\SilverStripeOAuth\Client\Mapper\MemberMapperInterface
+     * @return MemberMapperInterface
      */
     public function createMapper($name)
     {

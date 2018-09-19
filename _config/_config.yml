@@ -1,3 +1,6 @@
+---
+Name: oauthcontroller
+---
 Bigfork\SilverStripeOAuth\Client\Control\Controller:
   token_handlers:
     loginhandler:
