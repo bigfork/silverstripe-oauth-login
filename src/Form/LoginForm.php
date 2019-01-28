@@ -23,11 +23,14 @@ class LoginForm extends SilverStripeLoginForm
         $this->setController($controller);
         $this->authenticator_class = $authenticatorClass;
         $this->setFormMethod('POST', true);
-
+        
+        parent::__construct($controller, $name, new FieldList(), new FieldList());
+        
         $fields = $fields ?: $this->getFormFields();
         $actions = $actions ?: $this->getFormActions();
-
-        parent::__construct($controller, $name, $fields, $actions);
+        
+        $this->setFields($fields);
+        $this->setActions($actions);
 
         $this->setTemplate('OAuthLoginForm');
     }
