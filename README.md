@@ -103,3 +103,29 @@ As it’s possible, and likely, for users to have accounts for multiple OAuth pr
 - Change the `Member.unique_identifier_field` config setting to something other than `Email` (for example, `ID`)
 - Update the config for [`GenericMemberMapper`](#using-genericmembermapper) for your providers, but omit the `Email` field
 - Create a [custom mapper](#using-a-custom-mapper) that doesn’t import email addresses
+
+### Replacing the default authenticator
+
+If you’d like to replace the default authenticator, or change the internal name of the oauth authenticator, you will need to reset the list of authenticators first. You can achieve this with the following approach:
+
+```yml
+---
+Name: app-auth-reset
+After:
+  - '#oauthauthenticator'
+---
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\Security\Security:
+    properties:
+      Authenticators: null
+---
+Name: app-auth
+After:
+  - '#app-auth-reset'
+---
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\Security\Security:
+    properties:
+      Authenticators:
+        myoauthname: '%$Bigfork\SilverStripeOAuth\Client\Authenticator\Authenticator'
+```
