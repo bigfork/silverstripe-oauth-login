@@ -10,13 +10,3 @@ Bigfork\SilverStripeOAuth\Client\Control\Controller:
 SilverStripe\Security\Member:
   extensions:
     - Bigfork\SilverStripeOAuth\Client\Extension\MemberExtension
----
-Name: oauthauthenticator
-After:
-  - '#coresecurity'
----
-SilverStripe\Core\Injector\Injector:
-  SilverStripe\Security\Security:
-    properties:
-      Authenticators:
-        oauth: '%$Bigfork\SilverStripeOAuth\Client\Authenticator\Authenticator'
