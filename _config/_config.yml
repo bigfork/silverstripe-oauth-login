@@ -7,6 +7,11 @@ Bigfork\SilverStripeOAuth\Client\Control\Controller:
       priority: 1
       context: login
       class: Bigfork\SilverStripeOAuth\Client\Handler\LoginTokenHandler
+  error_handlers:
+    errorhandler:
+      priority: 1
+      context: login
+      class: Bigfork\SilverStripeOAuth\Client\Handler\LoginErrorHandler
 SilverStripe\Security\Member:
   extensions:
     - Bigfork\SilverStripeOAuth\Client\Extension\MemberExtension
