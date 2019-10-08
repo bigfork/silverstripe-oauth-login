@@ -50,6 +50,37 @@ You can customise the look of the login actions for each provider by creating th
 
 The `Bigfork\SilverStripeOAuth\Client\Form\LoginForm` class also provides two extension points, `updateFields` and `updateActions` for further customisation.
 
+## Error handling
+
+When a provider returns successfully, but returns an error state (for example, when a user chooses to reject the permissions you’re asking for), this module will attempt to return the user to the login screen and display a human-readable error message. As each provider returns error messages in different formats, you may need to add your own error handler in the event that the default handler is unable to show a suitable message. For example:
+
+```yml
+Bigfork\SilverStripeOAuth\Client\Control\Controller:
+  error_handlers:
+    loginerrorhandler:
+      priority: 10
+      context: login
+      class: 'MyLoginErrorHandler'
+```
+
+```php
+use Exception;
+use League\OAuth2\Client\Provider\AbstractProvider;
+use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Security\Security;
+
+class LoginErrorHandler implements ErrorHandler
+{
+    public function handleError(AbstractProvider $provider, HTTPRequest $request, Exception $exception)
+    {
+        $message = $request->getVar('some_error_message_get_var');
+        if ($message) {
+            return Security::permissionFailure(null, $message);
+        }
+    }
+}
+```
+
 ---
 
 ## Concepts
