@@ -42,7 +42,7 @@ Bigfork\SilverStripeOAuth\Client\Authenticator\Authenticator:
 You can customise the look of the login actions for each provider by creating the relevant template, following the naming convention `FormAction_OAuth_<ProviderName>`. For example:
 
 ```html
-<!-- themes/mysite/templates/forms/FormAction_OAuth_Facebook.ss -->
+<!-- themes/mysite/templates/FormAction_OAuth_Facebook.ss -->
 <button type="submit" name="{$Name}" id="{$ID}" class="facebook-login">
     Connect with Facebook
 </button>
