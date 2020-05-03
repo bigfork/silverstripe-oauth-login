@@ -29,7 +29,7 @@ SilverStripe\Core\Injector\Injector:
       Options:
         clientId: '12345678987654321'
         clientSecret: 'geisjgoesingoi3h1521onnro12rin'
-        graphApiVersion: 'v2.6'
+        graphApiVersion: 'v6.0'
 Bigfork\SilverStripeOAuth\Client\Authenticator\Authenticator:
   providers:
     'Facebook': # Matches the key for '$%FacebookProvider' above
