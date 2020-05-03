@@ -60,7 +60,7 @@ class LoginForm extends SilverStripeLoginForm
     public function getFormActions()
     {
         $actions = FieldList::create();
-        $providers = Config::inst()->get($this->authenticator_class, 'providers');
+        $providers = Config::inst()->get($this->getAuthenticatorClass(), 'providers');
 
         foreach ($providers as $provider => $config) {
             $name = isset($config['name']) ? $config['name'] : $provider;
