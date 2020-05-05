@@ -74,6 +74,7 @@ class LoginFormTest extends LoginTestCase
         $mockLoginForm->expects($this->once())
             ->method('getController')
             ->will($this->returnValue($mockController));
+        $mockLoginForm->setAuthenticatorClass(Authenticator::class);
 
         $response = $mockLoginForm->handleProvider('ProviderName');
         $this->assertSame($response, $expectedResponse);
@@ -97,6 +98,7 @@ class LoginFormTest extends LoginTestCase
             ->method('handleProvider')
             ->with('ProviderName')
             ->will($this->returnValue($expectedResponse));
+        $mockLoginForm->setAuthenticatorClass(Authenticator::class);
 
         $response = $mockLoginForm->authenticate_ProviderName();
         $this->assertSame($response, $expectedResponse);
