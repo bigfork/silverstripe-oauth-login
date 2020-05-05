@@ -1,17 +1,14 @@
 language: php
 
-dist: precise
+dist: xenial
 
-# Currently Supported Versions of PHP; https://www.php.net/supported-versions.php
+services:
+  - mysql
+
 php:
   - 7.2
   - 7.3
   - 7.4
-
-jobs:
-  allow_failures:
-    # Security Support Until 30 Nov 2020
-    - php: 7.2
 
 env:
   global:
@@ -19,13 +16,15 @@ env:
 
 before_script:
 # Init PHP
+  - composer self-update || true
   - phpenv rehash
   - phpenv config-rm xdebug.ini
-  - echo 'memory_limit = 2G' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+  - export PATH=~/.config/composer/vendor/bin:$PATH
+  - echo 'memory_limit = 3G' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
 
 # Install composer dependencies
   - composer validate
-  - composer require silverstripe/recipe-core:4.x-dev silverstripe/versioned:1.2.x-dev --no-update
+  - composer require silverstripe/recipe-core:4.4.x-dev silverstripe/versioned:1.4.x-dev --no-update
   - composer install --prefer-dist --no-interaction --no-progress --no-suggest --optimize-autoloader --verbose --profile
 
 script:
