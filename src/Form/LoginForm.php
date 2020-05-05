@@ -21,7 +21,7 @@ class LoginForm extends SilverStripeLoginForm
         $actions = null
     ) {
         $this->setController($controller);
-        $this->authenticator_class = $authenticatorClass;
+        $this->setAuthenticatorClass($authenticatorClass);
         $this->setFormMethod('POST', true);
         
         parent::__construct($controller, $name, new FieldList(), new FieldList());
@@ -45,7 +45,7 @@ class LoginForm extends SilverStripeLoginForm
         }
 
         $fields = FieldList::create(
-            HiddenField::create('AuthenticationMethod', null, $this->authenticator_class, $this)
+            HiddenField::create('AuthenticationMethod', null, $this->getAuthenticatorClass(), $this)
         );
 
         if (isset($backURL)) {
@@ -90,7 +90,7 @@ class LoginForm extends SilverStripeLoginForm
     {
         $this->extend('onBeforeHandleProvider', $name);
 
-        $providers = Config::inst()->get($this->authenticator_class, 'providers');
+        $providers = Config::inst()->get($this->getAuthenticatorClass(), 'providers');
         $config = $providers[$name];
         $scope = isset($config['scopes']) ? $config['scopes'] : ['email']; // We need at least an email address!
         $url = Helper::buildAuthorisationUrl($name, 'login', $scope);
@@ -104,7 +104,7 @@ class LoginForm extends SilverStripeLoginForm
     public function hasMethod($method)
     {
         if (strpos($method, 'authenticate_') === 0) {
-            $providers = Config::inst()->get($this->authenticator_class, 'providers');
+            $providers = Config::inst()->get($this->getAuthenticatorClass(), 'providers');
             $name = substr($method, strlen('authenticate_'));
 
             if (isset($providers[$name])) {
@@ -121,7 +121,7 @@ class LoginForm extends SilverStripeLoginForm
     public function __call($method, $args)
     {
         if (strpos($method, 'authenticate_') === 0) {
-            $providers = Config::inst()->get($this->authenticator_class, 'providers');
+            $providers = Config::inst()->get($this->getAuthenticatorClass(), 'providers');
             $name = substr($method, strlen('authenticate_'));
 
             if (isset($providers[$name])) {
