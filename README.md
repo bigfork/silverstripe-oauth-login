@@ -103,8 +103,8 @@ The default mapper (`Bigfork\SilverStripeOAuth\Client\Mapper\GenericMemberMapper
 Bigfork\SilverStripeOAuth\Client\Mapper\GenericMemberMapper:
   mapping:
     'Facebook':
-      'Town' => 'Hometown' # Town is the SilverStripe db column, 'Hometown' is in the data returned by Facebook
-      'Gender' => 'Gender'
+      'Town': 'Hometown' # Town is the SilverStripe db column, 'Hometown' is in the data returned by Facebook
+      'Gender': 'Gender'
 ```
 
 #### Using a custom mapper
