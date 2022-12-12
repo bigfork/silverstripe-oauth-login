@@ -6,6 +6,7 @@ use SilverStripe\Control\HTTPRequest;
 use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\Authenticator as SilverStripeAuthenticator;
 use SilverStripe\Security\Member;
+use SilverStripe\Security\MemberAuthenticator\LogoutHandler;
 
 class Authenticator implements SilverStripeAuthenticator
 {
@@ -17,7 +18,7 @@ class Authenticator implements SilverStripeAuthenticator
 
     public function supportedServices()
     {
-        return SilverStripeAuthenticator::LOGIN;
+        return SilverStripeAuthenticator::LOGIN | SilverStripeAuthenticator::LOGOUT;
     }
 
     public function getLoginHandler($link)
@@ -37,7 +38,8 @@ class Authenticator implements SilverStripeAuthenticator
 
     public function getLogoutHandler($link)
     {
-        // No-op
+        // return the default handler
+        return LogoutHandler::create($link, $this);
     }
 
     public function getLostPasswordHandler($link)
