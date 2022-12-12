@@ -39,7 +39,7 @@ class Authenticator implements SilverStripeAuthenticator
     public function getLogoutHandler($link)
     {
         // return the default handler
-        return LogoutHandler::create();
+        return LogoutHandler::create($link, $this);
     }
 
     public function getLostPasswordHandler($link)
