@@ -11,8 +11,8 @@
     ],
     "license": "BSD-3-Clause",
     "require": {
-        "bigfork/silverstripe-oauth": "^2.1",
-        "silverstripe/framework": "^4.4"
+        "bigfork/silverstripe-oauth": "^2",
+        "silverstripe/framework": "^4.4 | ^5"
     },
     "require-dev": {
         "phpunit/phpunit": "^5.7",
