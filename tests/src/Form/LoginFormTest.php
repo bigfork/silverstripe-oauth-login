@@ -112,7 +112,7 @@ class LoginFormTest_Controller extends Controller
         return 'loginformtest/';
     }
 
-    public function AbsoluteLink()
+    public function AbsoluteLink($action = '')
     {
         return 'http://mysite.com/loginformtest/';
     }
