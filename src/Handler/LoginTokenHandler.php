@@ -33,7 +33,7 @@ class LoginTokenHandler implements TokenHandler
         // Check whether the member can log in before we proceed
         $result = $member->validateCanLogin();
         if (!$result->isValid()) {
-            return Security::permissionFailure(null, implode('; ', $result->getMessages()));
+            return Security::permissionFailure(null, implode('; ', array_column($result->getMessages(), 'message')));
         }
 
         // Log the member in
